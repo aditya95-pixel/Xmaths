@@ -32,6 +32,7 @@ export async function POST(req){
                 userData,     
                 { upsert: true, new: true } 
             );
+            break;
         case "user.deleted":
             await User.findByIdAndDelete(data.id);
             break;
