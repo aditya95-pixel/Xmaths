@@ -16,10 +16,13 @@ export async function POST(req){
     const payload=await req.json();
     const body=JSON.stringify(payload);
     const {data,type}=wh.verify(body,svixHeaders);
+    const emailAddress = data.email_addresses && data.email_addresses.length > 0
+                             ? data.email_addresses[0].email_address
+                             : null;
     // Prepare the user data to be saved in the database
     const userData={
         _id:data.id,
-        email:data.email_addresses[0].email_address,
+        email:emailAddress,
         name:`${data.first_name} ${data.last_name}`,
         image:data.image_url,
     };
