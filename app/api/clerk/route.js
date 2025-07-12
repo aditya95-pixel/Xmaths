@@ -1,7 +1,7 @@
 import { Webhook } from "svix";
 import connectDB from "@/config/db";
 import User from "@/models/User";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 export async function POST(req){
@@ -16,25 +16,20 @@ export async function POST(req){
     const payload=await req.json();
     const body=JSON.stringify(payload);
     const {data,type}=wh.verify(body,svixHeaders);
-    const emailAddress = data.email_addresses && data.email_addresses.length > 0
-                             ? data.email_addresses[0].email_address
-                             : null;
     // Prepare the user data to be saved in the database
     const userData={
         _id:data.id,
-        email:emailAddress,
+        email:data.email_addresses[0].email_address,
         name:`${data.first_name} ${data.last_name}`,
         image:data.image_url,
     };
     await connectDB();
     switch (type) {
         case "user.created":
+            await User.create(userData);
+            break;
         case "user.updated":
-            await User.findByIdAndUpdate(
-                userData._id, 
-                userData,     
-                { upsert: true, new: true } 
-            );
+            await User.findByIdAndUpdate(data.id,userData);
             break;
         case "user.deleted":
             await User.findByIdAndDelete(data.id);
@@ -42,5 +37,5 @@ export async function POST(req){
         default:
             break;
     }
-    return NextRequest.json({message:"Event received"});
+    return NextResponse.json({message:"Event received"});
 }
