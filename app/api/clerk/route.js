@@ -26,11 +26,12 @@ export async function POST(req){
     await connectDB();
     switch (type) {
         case "user.created":
-            await User.create(userData);
-            break;
         case "user.updated":
-            await User.findByIdAndUpdate(data.id,userData);
-            break;
+            await User.findByIdAndUpdate(
+                userData._id, 
+                userData,     
+                { upsert: true, new: true } 
+            );
         case "user.deleted":
             await User.findByIdAndDelete(data.id);
             break;
