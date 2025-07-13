@@ -18,7 +18,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
+    "react-latex": "^2.0.0",
     "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "svix": "^1.69.0"
   },
   "devDependencies": {
