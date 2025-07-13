@@ -24,6 +24,7 @@ export async function POST(req){
             content:prompt,
             timestamp:Date.now()
         };
+        console.log(userPrompt);
         data.messages.push(userPrompt);
         
         const completion=await genAI.models.generateContent({
