@@ -18,7 +18,7 @@ const Message = ({role,content}) => {
         toast.success("Message copied to clipboard")
     }
   return (
-    <div className='flex flex-col items-center w-full max-w-3xl text-sm'>
+    <div className='flex flex-col items-center w-full max-w-3xl text-base'>
         <div className={`flex flex-col w-full mb-8 ${role==='user' && 'items-end'}`}>
             <div className={`group relative flex max-w-2xl py-3 rounded-xl
                 ${role==='user' ? 'bg-[#414158] px-5' : 'gap-3'}`}>
@@ -43,7 +43,7 @@ const Message = ({role,content}) => {
                     { 
                         role === 'user' ? 
                         (
-                            <span className='text-white/90'>{content}</span>
+                            <span className='text-white/90 leading-relaxed'>{content}</span>
                         )
                         :
                         (
@@ -51,11 +51,15 @@ const Message = ({role,content}) => {
                                 <Image src={assets.logo_icon} alt='' className='h-9 w-9 p-1
                                 border border-white/15 rounded-full'/>
                                 <div className='space-y-4 w-full overflow-scroll'>
-                                    <div className="prose prose-invert max-w-none">
+                                    <div className="prose prose-invert max-w-none leading-relaxed">
                                     <ReactMarkdown
                                         children={content}
                                         remarkPlugins={[remarkMath]}
                                         rehypePlugins={[rehypeKatex]}
+                                        components={{
+                                            p: ({node, ...props}) => <p className="mb-4" {...props} />,
+                                            li: ({node, ...props}) => <li className="mb-2" {...props} />,
+                                        }}
                                     />
                                     </div>
                                 </div>

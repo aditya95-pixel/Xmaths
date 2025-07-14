@@ -24,12 +24,28 @@ export async function POST(req){
             content:prompt,
             timestamp:Date.now()
         };
-        console.log(userPrompt);
         data.messages.push(userPrompt);
+
+        // Chat Memory
+        let prompt_with_chat_memory="";
+        for(let i=0;i<data.messages.length;i++){
+            prompt_with_chat_memory+=String(data.messages[i].role)+"\n"+String(data.messages[i].content)+"\n";
+        }
+
+        // Specialised prompt for maths specialisation
+        let content=`
+        You are an expert in Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning. You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly and concisely.
+
+        Given the following conversation and problem, analyze the discussion and provide a solution that is accurate, efficient, and easy to understand. Your solution should leverage your expertise in the aforementioned domains.
+
+        Please format your response using Markdown syntax. For mathematical equations, use LaTeX notation wrapped in $ for inline equations or $$ for block equations. For superscripts/subscripts, use LaTeX notation (_{} and ^{}) rather than HTML tags.
+        ---
         
+        ${prompt_with_chat_memory}
+        `
         const completion=await genAI.models.generateContent({
             model:'gemini-2.0-flash-001',
-            contents:prompt
+            contents:content
         });
         
         const message=completion.text;
