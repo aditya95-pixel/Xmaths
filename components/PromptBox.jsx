@@ -7,7 +7,6 @@ import toast from 'react-hot-toast';
 import { Mic } from 'lucide-react';
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
-
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const { user, chats, setChats, selectedChat, setSelectedChat } = useAppContext();
@@ -181,7 +180,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
               isRecording ? 'bg-red-600' : 'bg-gray-500'
             }`}
           >
-             <Mic size={24} color="currentColor" />
+            🎤
           </button>
           <button
             type="submit"
