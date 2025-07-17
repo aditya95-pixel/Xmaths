@@ -180,7 +180,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
               isRecording ? 'bg-red-600' : 'bg-gray-500'
             }`}
           >
-            🎤
+            <Mic size={24} color='white'/>
           </button>
           <button
             type="submit"
