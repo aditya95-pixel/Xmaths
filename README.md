@@ -82,3 +82,48 @@ This document outlines the structure of the **Chat** collection in the MongoDB d
 | `updatedAt`        | `Date`                 |  Yes       | When the chat document was last updated.                         | Updated on each message addition or edit. |
 
 ---
+
+
+## MongoDB Connection Utility with Caching (Mongoose)
+
+This module provides a reliable and optimized way to connect to MongoDB using **Mongoose**, with support for **connection caching** to prevent duplicate connections — especially useful in environments like **Next.js**, **serverless functions**, or apps using **hot-reloading**.
+
+---
+
+###  Why Use This?
+
+Connecting to MongoDB repeatedly in environments like:
+
+- Serverless platforms (e.g., Vercel, AWS Lambda)
+- Development environments with hot-reloading (e.g., Next.js)
+
+...can result in **too many open connections**, leading to performance issues or MongoDB errors.
+
+This utility solves the problem by:
+- Reusing an already established connection (`conn`)
+- Avoiding multiple concurrent connection attempts (`promise`)
+
+---
+
+###  How It Works
+
+```js
+// config/db.js
+import mongoose from "mongoose";
+
+let cached = global.mongoose || { conn: null, promise: null };
+
+export default async function connectDB() {
+    if (cached.conn) {
+        return cached.conn;
+    }
+    if (!cached.promise) {
+        cached.promise = mongoose.connect(process.env.MONGODB_URI).then((mongoose) => mongoose);
+    }
+    try {
+        cached.conn = await cached.promise;
+    } catch (error) {
+        console.error("Error connecting to MongoDB", error);
+    }
+    return cached.conn;
+}
