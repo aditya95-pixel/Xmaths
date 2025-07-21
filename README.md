@@ -10,4 +10,8 @@
 
 4. **Performance for Read-Heavy Workloads**
 
+## Role Of Mongoose in Our Project 
+
+Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It provides a straightforward, schema-based solution to model our application data, enforcing a structure on the otherwise schemaless MongoDB documents.
+
 ## Database Models
