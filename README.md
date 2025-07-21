@@ -127,3 +127,127 @@ export default async function connectDB() {
     }
     return cached.conn;
 }
+
+```
+
+# AppContextProvider – Global State Management for Authenticated Chat
+
+This module implements a global context provider for managing **authenticated user sessions**, **chat data**, and **API interactions** in a Clerk-powered Next.js app.
+
+It ensures that:
+- User chat sessions are initialized and fetched upon login
+- Chat state (chats, selectedChat) is accessible across the app
+- Auth tokens are correctly handled when communicating with secured backend endpoints
+
+---
+
+##  Features
+
+-  Automatically fetches or creates chat sessions for the user
+-  Global access to chat and user state via React Context
+-  Axios-based secure API calls with Bearer tokens
+-  User-friendly error reporting via `react-hot-toast`
+
+---
+
+
+## Code
+
+```js
+// context/AppContext.jsx
+
+"use client"; // Indicates this is a Client Component in Next.js
+
+import { useAuth, useUser } from "@clerk/nextjs"; // Clerk for authentication
+import axios from "axios"; // For making HTTP requests
+import { createContext, useContext, useEffect, useState } from "react"; // React hooks
+import toast from "react-hot-toast"; // For displaying notifications
+
+// 1. Create the Context
+export const AppContext = createContext();
+
+// 2. Custom Hook to Consume the Context
+export const useAppContext = () => {
+    return useContext(AppContext);
+}
+
+// 3. Context Provider Component
+export const AppContextProvider = ({ children }) => {
+    // 3.1. Authentication Hooks from Clerk
+    const { user } = useUser(); // Provides user object (includes user.id, user.fullName, etc.)
+    const { getToken } = useAuth(); // Provides a function to get the authentication token
+
+    // 3.2. State Variables
+    const [chats, setChats] = useState([]); // Stores an array of all chat sessions for the current user
+    const [selectedChat, setSelectedChat] = useState(null); // Stores the currently active chat session
+
+    // 3.3. createNewChat Function
+    const createNewChat = async () => {
+        try {
+            if (!user) { // Ensure user is logged in before creating a chat
+                console.warn("Attempted to create new chat without a logged-in user.");
+                return null;
+            }
+            const token = await getToken(); // Get the authentication token from Clerk
+            // Send a POST request to create a new chat on the backend
+            await axios.post('/api/chat/create', {}, { headers: { Authorization: Bearer ${token} } });
+            fetchUsersChats(); // After creating, refetch all chats to update the UI
+        } catch (error) {
+            console.error("Error creating new chat:", error); // Log for debugging
+            toast.error(error.message); // Display error to the user
+        }
+    }
+
+    // 3.4. fetchUsersChats Function
+    const fetchUsersChats = async () => {
+        try {
+            // Get the authentication token
+            const token = await getToken();
+            // Send a GET request to fetch all chats for the current user
+            const { data } = await axios.get('/api/chat/get', { headers: { Authorization: Bearer ${token} } });
+
+            if (data.success) { // Check if the API response indicates success
+                setChats(data.data); // Update the chats state with fetched data
+
+                if (data.data.length === 0) {
+                    // If no chats exist, create a new one automatically
+                    await createNewChat();
+                    return fetchUsersChats(); // After creating, refetch again to load the new chat
+                } else {
+                    // Sort chats by updatedAt timestamp (most recent first)
+                    data.data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                    // Set the most recent chat as the selected chat
+                    setSelectedChat(data.data[0]);
+                }
+            } else {
+                toast.error(data.message); // Display error message from the API
+            }
+        } catch (error) {
+            console.error("Error fetching user chats:", error); // Log for debugging
+            toast.error(error.message); // Display error to the user
+        }
+    }
+
+    // 3.5. useEffect Hook for Initial Data Fetching
+    useEffect(() => {
+        if (user) { // Only fetch chats if a user is logged in (Clerk's user object is available)
+            fetchUsersChats();
+        }
+    }, [user]); // Dependency array: re-run this effect when the 'user' object changes
+
+    // 3.6. Context Value
+    const value = {
+        user,             // The Clerk user object
+        chats,            // Array of all user's chat sessions
+        setChats,         // Function to update the chats array
+        selectedChat,     // The currently active chat session
+        setSelectedChat,  // Function to set the active chat session
+        fetchUsersChats,  // Function to refetch all user chats
+        createNewChat     // Function to create a new chat session
+    }
+
+    // 3.7. Provide the Context
+    return <AppContext.Provider value={value}>{children}</AppContext.Provider>
+}
+```
+
