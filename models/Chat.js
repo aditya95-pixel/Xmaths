@@ -10,7 +10,7 @@ const ChatSchema= new mongoose.Schema(
                 timestamp:{type:String,required:true}
             }
         ],
-        userId:{type:String,required:true}
+        userId:{type:String,ref: 'User',required:true}
     },
     {timestamps:true}
 );
