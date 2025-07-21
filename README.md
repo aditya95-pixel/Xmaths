@@ -312,3 +312,66 @@ This endpoint allows the frontend to request the creation of a new, empty chat s
 
 **Response** :
 This endpoint returns a JSON object with success and message (or error) properties.
+
+## Explanation for our app/api/chat/delete/route.js file.
+
+### Code
+
+```js
+import connectDB from "@/config/db";
+import Chat from "@/models/Chat";
+import { getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+export async function POST(req) {
+    try {
+        const {userId}=getAuth(req);
+        const {chatId}=await req.json();
+        if(!userId){
+            return NextResponse.json({
+                success:false,
+                message:"User not authenticated"
+            });
+        }
+        await connectDB();
+        await Chat.deleteOne({_id:chatId,userId});
+        return NextResponse.json({success:true,message:"Chat Deleted"});
+    } catch (error) {
+        return NextResponse.json({success:false,error:error.message});
+    }
+}
+```
+
+### Purpose
+This endpoint allows an authenticated user to delete a specific chat session from their history. It ensures that a user can only delete chats that belong to them.
+
+### How it Works
+**Authentication Check** : It retrieves the userId from the incoming request using Clerk's getAuth(req). If no userId is present, it means the user is not authenticated, and an error response is returned immediately.
+
+**Extract Chat ID** : It parses the request body to extract the chatId of the chat session intended for deletion.
+
+**Database Connection** : It establishes or reuses a connection to the MongoDB database via connectDB().
+
+**Delete Chat Document** : It executes a Chat.deleteOne() operation on the MongoDB chats collection. Crucially, it uses a compound query:
+
+  1. _id: chatId: Matches the specific chat document by its unique ID.
+  2. userId: This is a critical security measure. It ensures that the document being deleted also belongs to the authenticated userId. This prevents users from deleting other users' chats by      simply guessing chatIds.
+
+**Success Response** : If the deleteOne operation completes (even if no document matched the criteria, the operation itself is considered successful), it returns a success message.
+
+**Error Handling** : Any errors during the process (e.g., authentication failure, database issues, invalid chatId format) are caught, and an error response is returned.
+
+**API Route** : /api/chat/delete
+- This API route handles the deletion of existing chat sessions for authenticated users in the Xmaths application.
+
+**File Path**: app/api/chat/delete/route.js
+
+**Method**: POST 
+
+**Headers** :
+- Authorization: Bearer <Clerk_JWT_Token>: A valid JSON Web Token obtained from Clerk. Essential for user authentication.
+
+**Content-Type** : application/json: Indicates that the request body is JSON.
+
+**Body** : A JSON object containing the chatId of the chat to be deleted.
+
+**Response** : This endpoint returns a JSON object with success and message (or error) properties.
