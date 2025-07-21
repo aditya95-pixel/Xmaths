@@ -375,3 +375,107 @@ This endpoint allows an authenticated user to delete a specific chat session fro
 **Body** : A JSON object containing the chatId of the chat to be deleted.
 
 **Response** : This endpoint returns a JSON object with success and message (or error) properties.
+
+## Explanation for our app/api/chat/get/route.js file.
+
+### Code
+```js
+import connectDB from "@/config/db";
+import Chat from "@/models/Chat";
+import { getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+export async function GET(req) {
+    try {
+        const {userId}=getAuth(req);
+        if(!userId){
+            return NextResponse.json({success:false,message:"User not authenticated"});
+        }
+        await connectDB();
+        const data=await Chat.find({userId});
+        return NextResponse.json({success:true,data});
+    } catch (error) {
+        return NextResponse.json({success:false,error:error.message});
+    }
+}
+```
+
+### Purpose
+This endpoint allows an authenticated user to retrieve all chat sessions associated with their user account. It ensures only authenticated users can access their own chats.
+
+### How it Works
+**Authentication Check** : Retrieves userId from the incoming request using Clerk's getAuth(req). If userId is not found, it returns an error response indicating the user is unauthenticated.
+
+**Database Connection** : Uses connectDB() to establish or reuse a MongoDB connection.
+
+**Fetch Chats** : Performs a Chat.find({userId}) query to retrieve all chat documents that belong to the authenticated user.
+
+**Success Response** : If successful, it returns all the retrieved chat data in a JSON object along with a success flag.
+
+**Error Handling** : Handles potential errors such as authentication failure or database issues and returns an appropriate error response.
+
+**API Route** : /api/chat/get
+
+**File Path** : app/api/chat/get/route.js
+
+**Method** : GET
+
+**Headers** :
+- Authorization: Bearer <Clerk_JWT_Token> — Required for authentication using Clerk.
+
+## Explanation for our app/api/chat/rename/route.js file.
+
+### Code
+
+```js
+import connectDB from "@/config/db";
+import Chat from "@/models/Chat";
+import { getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+export async function POST(req) {
+    try {
+        const {userId}=getAuth(req);
+        if(!userId){
+            return NextResponse.json({
+                success:false,
+                message:"User not authenticated"
+            });
+        }
+        const {chatId,name}=await req.json();
+        await connectDB();
+        await Chat.findOneAndUpdate({_id:chatId,userId},{name});
+        return NextResponse.json({success:true,message:"Chat Renamed"});
+    } catch (error) {
+        return NextResponse.json({success:false,error:error.message});
+    }
+}
+```
+
+### Purpose
+This endpoint enables an authenticated user to rename an existing chat session. It verifies the user owns the chat before updating its name.
+
+### How it Works
+
+**Authentication Check** : Retrieves userId using Clerk's getAuth(req). If unauthenticated, it immediately returns an error response.
+
+**Parse Request Body** : Extracts chatId and name from the JSON body of the request.
+
+**Database Connection** : Establishes a connection to MongoDB using connectDB().
+
+**Update Chat Name** : Uses Chat.findOneAndUpdate() to rename the chat. It ensures that the chat being updated belongs to the authenticated user ({_id: chatId, userId}).
+
+**Success Response** : Returns a confirmation message if the chat was successfully renamed.
+
+**Error Handling** : Catches and returns any error encountered during the process.
+
+**API Route** :  /api/chat/rename
+
+**File Path** : app/api/chat/rename/route.js
+
+**Method** : POST
+
+**Headers** :
+- Authorization: Bearer <Clerk_JWT_Token> — Required for user authentication.
+
+**Content-Type** : application/json
