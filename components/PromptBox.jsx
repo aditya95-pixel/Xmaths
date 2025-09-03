@@ -4,13 +4,16 @@ import axios from 'axios';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Mic } from 'lucide-react';
+import { Mic, X } from 'lucide-react';
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // image state
   const { user, chats, setChats, selectedChat, setSelectedChat } = useAppContext();
   const timeouts = useRef([]);
+
+  const fileInputRef = useRef(null);
 
   const SpeechRecognition = typeof window !== 'undefined' &&
     (window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -59,6 +62,24 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     }
   };
 
+  const handleFileClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+    } else {
+      toast.error('Please upload a valid image file');
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    fileInputRef.current.value = '';
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -69,7 +90,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
   const sendPrompt = async (e) => {
     e.preventDefault();
     const trimmedPrompt = prompt.trim();
-    if (!trimmedPrompt) return;
+    if (!trimmedPrompt && !selectedImage) return;
 
     if (!user) return toast.error('User not authenticated');
     if (isLoading) return toast.error('Wait for previous prompt response');
@@ -81,6 +102,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     const userPrompt = {
       role: 'user',
       content: trimmedPrompt,
+      image: selectedImage ? URL.createObjectURL(selectedImage) : null,
       timestamp: Date.now()
     };
 
@@ -98,9 +120,13 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     }));
 
     try {
-      const { data } = await axios.post('/api/chat/ai', {
-        chatId: selectedChat._id,
-        prompt: trimmedPrompt
+      const formData = new FormData();
+      formData.append('chatId', selectedChat._id);
+      formData.append('prompt', trimmedPrompt);
+      if (selectedImage) formData.append('image', selectedImage);
+
+      const { data } = await axios.post('/api/chat/ai', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       if (data.success) {
@@ -147,6 +173,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       toast.error(error.message);
     } finally {
       setIsLoading(false);
+      setSelectedImage(null);
     }
   };
 
@@ -162,17 +189,47 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
         className="outline-none w-full resize-none overflow-hidden break-words bg-transparent"
         rows={2}
         placeholder="Message Xmaths"
-        required
+        required={!selectedImage}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
+
+      {/* Image Preview */}
+      {selectedImage && (
+        <div className="relative mt-2 inline-block">
+          <img
+            src={URL.createObjectURL(selectedImage)}
+            alt="Preview"
+            className="w-24 h-24 object-cover rounded-lg"
+          />
+          <button
+            type="button"
+            onClick={removeImage}
+            className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
+          >
+            <X size={16} color="white" />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between text-sm mt-2">
         <div className="flex items-center gap-2">
+          {/* Image Upload */}
           <Image
             className="h-5 cursor-pointer"
             src={assets.pin_icon}
             alt="Attach file"
+            onClick={handleFileClick}
           />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* Voice Input */}
           <button
             type="button"
             onClick={handleVoiceInput}
@@ -180,19 +237,23 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
               isRecording ? 'bg-red-600' : 'bg-gray-500'
             }`}
           >
-            <Mic size={24} color='white'/>
+            <Mic size={24} color="white" />
           </button>
+
+          {/* Send Button */}
           <button
             type="submit"
             className={`${
-              prompt.trim() ? 'bg-primary' : 'bg-gray-500'
+              prompt.trim() || selectedImage ? 'bg-primary' : 'bg-gray-500'
             } rounded-full p-2 cursor-pointer`}
             disabled={isLoading}
           >
             <Image
               className="w-3.5 aspect-square"
               src={
-                prompt.trim() ? assets.arrow_icon : assets.arrow_icon_dull
+                prompt.trim() || selectedImage
+                  ? assets.arrow_icon
+                  : assets.arrow_icon_dull
               }
               alt="Send message"
             />
