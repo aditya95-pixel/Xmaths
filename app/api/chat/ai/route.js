@@ -23,6 +23,7 @@ export async function POST(req) {
     const prompt = formData.get("prompt");
     const image = formData.get("image"); // File object if uploaded
     const domain = formData.get("domain");
+    console.log(domain);
     await connectDB();
     const data = await Chat.findOne({ userId, _id: chatId });
 

@@ -4,22 +4,22 @@ import axios from 'axios';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Mic, X, MoreVertical } from 'lucide-react';
+import { Mic, X, MoreVertical, Check } from 'lucide-react'; // Added Check icon
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // image state
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown toggle state
-  const dropdownRef = useRef(null); // Reference for click outside
+  const [selectedImage, setSelectedImage] = useState(null); 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+  const dropdownRef = useRef(null); 
   const [selectedDomain, setSelectedDomain] = useState(null);
 
   const { user, chats, setChats, selectedChat, setSelectedChat } = useAppContext();
   const timeouts = useRef([]);
-
   const fileInputRef = useRef(null);
 
-  const SpeechRecognition = typeof window !== 'undefined' &&
+  const SpeechRecognition =
+    typeof window !== 'undefined' &&
     (window.SpeechRecognition || window.webkitSpeechRecognition);
 
   const recognitionRef = useRef(
@@ -292,18 +292,21 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute bottom-12 right-0 bg-[#2e2e32] text-white rounded-lg shadow-lg w-48">
+              <div className="absolute bottom-12 right-0 bg-[#2e2e32] text-white rounded-lg shadow-lg w-56">
                 <ul className="flex flex-col">
                   {['Mathematics', 'Algorithms', 'Linear Algebra', 'Machine Learning', 'Deep Learning'].map((item) => (
                     <li
                       key={item}
-                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer flex justify-between items-center"
                       onClick={() => {
                         setSelectedDomain(item);
                         setIsDropdownOpen(false);
                       }}
                     >
-                      {item}
+                      <span>{item}</span>
+                      {selectedDomain === item && (
+                        <Check size={18} className="text-green-400" />
+                      )}
                     </li>
                   ))}
                 </ul>
