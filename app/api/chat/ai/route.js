@@ -22,7 +22,7 @@ export async function POST(req) {
     const chatId = formData.get("chatId");
     const prompt = formData.get("prompt");
     const image = formData.get("image"); // File object if uploaded
-
+    const domain = formData.get("domain");
     await connectDB();
     const data = await Chat.findOne({ userId, _id: chatId });
 
@@ -59,7 +59,7 @@ export async function POST(req) {
     }
 
     let content = `
-    You are an expert in Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning. 
+    You are an expert in ${domain || "Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning"}. 
     You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly and concisely.
 
     Given the following conversation and problem, analyze the discussion and provide a solution that is accurate, efficient, and easy to understand. 

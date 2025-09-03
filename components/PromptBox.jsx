@@ -2,14 +2,18 @@ import { assets } from '@/assets/assets';
 import { useAppContext } from '@/context/AppContext';
 import axios from 'axios';
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Mic, X } from 'lucide-react';
+import { Mic, X, MoreVertical } from 'lucide-react';
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // image state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown toggle state
+  const dropdownRef = useRef(null); // Reference for click outside
+  const [selectedDomain, setSelectedDomain] = useState(null);
+
   const { user, chats, setChats, selectedChat, setSelectedChat } = useAppContext();
   const timeouts = useRef([]);
 
@@ -32,6 +36,23 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     timeouts.current.forEach(clearTimeout);
     timeouts.current = [];
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const handleVoiceInput = () => {
     const recognition = recognitionRef.current;
@@ -124,7 +145,8 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       formData.append('chatId', selectedChat._id);
       formData.append('prompt', trimmedPrompt);
       if (selectedImage) formData.append('image', selectedImage);
-
+      if (selectedDomain) formData.append('domain', selectedDomain); 
+      
       const { data } = await axios.post('/api/chat/ai', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -182,7 +204,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       onSubmit={sendPrompt}
       className={`w-full ${
         selectedChat?.messages.length > 0 ? 'max-w-3xl' : 'max-w-2xl'
-      } bg-[#404045] p-4 rounded-3xl mt-4 transition-all`}
+      } bg-[#404045] p-4 rounded-3xl mt-4 transition-all relative`}
     >
       <textarea
         onKeyDown={handleKeyDown}
@@ -212,7 +234,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
         </div>
       )}
 
-      <div className="flex items-center justify-between text-sm mt-2">
+      <div className="flex items-center justify-between text-sm mt-2 relative">
         <div className="flex items-center gap-2">
           {/* Image Upload */}
           <Image
@@ -258,6 +280,36 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
               alt="Send message"
             />
           </button>
+
+          {/* Dropdown Button */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              className="bg-gray-600 hover:bg-gray-700 rounded-full p-2 ml-2 cursor-pointer"
+            >
+              <MoreVertical size={20} color="white" />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute bottom-12 right-0 bg-[#2e2e32] text-white rounded-lg shadow-lg w-48">
+                <ul className="flex flex-col">
+                  {['Mathematics', 'Algorithms', 'Linear Algebra', 'Machine Learning', 'Deep Learning'].map((item) => (
+                    <li
+                      key={item}
+                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => {
+                        setSelectedDomain(item);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </form>
