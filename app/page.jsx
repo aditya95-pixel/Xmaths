@@ -40,13 +40,14 @@ export default function Home() {
             </div>
             {messages.length === 0 ? (
               <>
-                <div className="flex items-center gap-3">
-                  <Image src={assets.logo_icon} alt="" className="h-10"/>
-                  <p className="text-2xl font-medium">Hello, I am <span className="text-3xl bg-gradient-to-b from-red-400 via-red-600 to-red-800
-              text-transparent bg-clip-text
-              tracking-tighter pb-2 pr-2
-              animate-gradient"><span className="text-4xl">X</span>maths</span></p>
-                </div>
+                <div className="flex items-center gap-3 bg-black px-4 py-2">
+                <Image src={assets.logo_icon} alt="" className="h-10" />
+                <p className="text-2xl font-medium">Hello I am  
+                  <span className="text-red-600 font-extrabold tracking-wide text-3xl">   X</span>
+                  <span className="text-white font-extrabold tracking-wide">MATHS</span>
+                </p>
+              </div>
+
                 <p className="text-sm mt-2">Which problems can I solve today?</p>
               </>
             ):(
