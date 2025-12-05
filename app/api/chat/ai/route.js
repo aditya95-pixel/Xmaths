@@ -73,7 +73,7 @@ export async function POST(req) {
     `;
 
     const completion = await genAI.models.generateContent({
-    model: "gemini-2.0-flash-001",
+    model: "gemini-2.5-flash",
     contents: [
         {
         role: "user",
