@@ -21,7 +21,7 @@ const Message = ({role,content}) => {
     <div className='flex flex-col items-center w-full max-w-3xl text-base'>
         <div className={`flex flex-col w-full mb-8 ${role==='user' && 'items-end'}`}>
             <div className={`group relative flex max-w-2xl py-3 rounded-xl
-                ${role==='user' ? 'bg-[#414158] px-5' : 'gap-3'}`}>
+                ${role==='user' ? 'dark:bg-[#414158] bg-gray-300 px-5' : 'gap-3'}`}>
                     <div className={`opacity-0 group-hover:opacity-100 absolute
                     ${role=='user' ? '-left-16 top-2.5' : 'left-9 -bottom-6'} transition-all`}>
                         <div className='flex items-center gap-2 opacity-70'>
@@ -43,7 +43,7 @@ const Message = ({role,content}) => {
                     { 
                         role === 'user' ? 
                         (
-                            <span className='text-white/90 leading-relaxed'>{content}</span>
+                            <span className='dark:text-white/90 leading-relaxed'>{content}</span>
                         )
                         :
                         (

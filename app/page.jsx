@@ -30,7 +30,7 @@ export default function Home() {
     <div>
       <div className="flex h-screen">
         <Sidebar expand={expand} setExpand={setExpand}/>
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8 bg-black text-white relative">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8 dark:bg-black dark:text-white relative">
             <div className="md:hidden absolute px-4 top-6 flex items-center justify-between w-full">
               <Image
               onClick={()=>{expand ? setExpand(false) : setExpand(true) }} className="rotate-180" src={assets.menu_icon}
@@ -40,11 +40,11 @@ export default function Home() {
             </div>
             {messages.length === 0 ? (
               <>
-                <div className="flex items-center gap-3 bg-black px-4 py-2">
+                <div className="flex items-center gap-3 dark:bg-black px-4 py-2">
                 <Image src={assets.logo_icon} alt="" className="h-10" />
                 <p className="text-2xl font-medium">Hello I am  
                   <span className="text-red-600 font-extrabold tracking-wide text-3xl">   X</span>
-                  <span className="text-white font-extrabold tracking-wide">MATHS</span>
+                  <span className="dark:text-white font-extrabold tracking-wide">MATHS</span>
                 </p>
               </div>
 
@@ -62,16 +62,16 @@ export default function Home() {
                     <Image className="h-9 w-9 p-1 border border-white/15 rounded-full"
                      src={assets.logo_icon} alt="logo"/>
                      <div className="loader flex justify-center items-center gap-1">
-                        <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
-                        <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
-                        <div className="w-1 h-1 rounded-full bg-white animate-bounce"></div>
+                        <div className="w-1 h-1 rounded-full dark:bg-white bg-black animate-bounce"></div>
+                        <div className="w-1 h-1 rounded-full dark:bg-white bg-black animate-bounce"></div>
+                        <div className="w-1 h-1 rounded-full dark:bg-white bg-black animate-bounce"></div>
                       </div>
                   </div>
                 )
               }
             </div>)}
             <PromptBox isLoading={isLoading} setIsLoading={setIsLoading}/>
-            <p className="text-xs absolute bottom-1 text-gray-500">Developed by Problem Solvers Inc.</p>
+            <p className="text-xs absolute bottom-1 dark:text-gray-500">Developed by Problem Solvers Inc.</p>
         </div>
       </div>
     </div>

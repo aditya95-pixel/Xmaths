@@ -204,7 +204,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       onSubmit={sendPrompt}
       className={`w-full ${
         selectedChat?.messages.length > 0 ? 'max-w-3xl' : 'max-w-2xl'
-      } bg-[#404045] p-4 rounded-3xl mt-4 transition-all relative`}
+      }  dark:bg-[#404045] bg-gray-200 p-4 rounded-3xl mt-4 transition-all relative`}
     >
       <textarea
         onKeyDown={handleKeyDown}
@@ -256,7 +256,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
             type="button"
             onClick={handleVoiceInput}
             className={`rounded-full p-2 cursor-pointer ${
-              isRecording ? 'bg-red-600' : 'bg-gray-500'
+              isRecording ? 'bg-red-600' : 'dark:bg-gray-500 bg-black'
             }`}
           >
             <Mic size={24} color="white" />
@@ -266,7 +266,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
           <button
             type="submit"
             className={`${
-              prompt.trim() || selectedImage ? 'bg-primary' : 'bg-gray-500'
+              prompt.trim() || selectedImage ? 'bg-primary' : 'dark:bg-gray-500 bg-gray-200'
             } rounded-full p-2 cursor-pointer`}
             disabled={isLoading}
           >
@@ -286,13 +286,13 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
             <button
               type="button"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
-              className="bg-gray-600 hover:bg-gray-700 rounded-full p-2 ml-2 cursor-pointer"
+              className="dark:bg-gray-600 bg-black hover:bg-gray-700 rounded-full p-2 ml-2 cursor-pointer"
             >
               <MoreVertical size={20} color="white" />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute bottom-12 right-0 bg-[#2e2e32] text-white rounded-lg shadow-lg w-56">
+              <div className="absolute bottom-12 right-0 dark:bg-[#2e2e32] bg-gray-200 dark:text-white rounded-lg shadow-lg w-56">
                 <ul className="flex flex-col">
                   {['Mathematics', 'Algorithms', 'Linear Algebra', 'Machine Learning', 'Deep Learning'].map((item) => (
                     <li
