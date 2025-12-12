@@ -71,9 +71,9 @@ export async function POST(req) {
     ---
     ${prompt_with_chat_memory}
     `;
-
+    let completion=null;
     try{
-      const completion = await genAI.models.generateContent({
+      completion = await genAI.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
           {
@@ -86,7 +86,7 @@ export async function POST(req) {
       ],
       });
     }catch(error){
-      const completion = await genAI.models.generateContent({
+      completion = await genAI.models.generateContent({
       model: "gemma-3-27b-it",
       contents: [
           {
