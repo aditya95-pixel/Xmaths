@@ -72,18 +72,33 @@ export async function POST(req) {
     ${prompt_with_chat_memory}
     `;
 
-    const completion = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-        {
-        role: "user",
-        parts: [
-            { text: content },
-            ...(geminiImagePart ? [geminiImagePart] : []), // attach image if exists
-        ],
-        },
-    ],
-    });
+    try{
+      const completion = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+          {
+          role: "user",
+          parts: [
+              { text: content },
+              ...(geminiImagePart ? [geminiImagePart] : []), // attach image if exists
+          ],
+          },
+      ],
+      });
+    }catch(error){
+      const completion = await genAI.models.generateContent({
+      model: "gemma-3-27b-it",
+      contents: [
+          {
+          role: "user",
+          parts: [
+              { text: content },
+              ...(geminiImagePart ? [geminiImagePart] : []), // attach image if exists
+          ],
+          },
+      ],
+      });
+    }
 
     const message = completion.text;
     const systemResponse = {
