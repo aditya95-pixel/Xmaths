@@ -154,7 +154,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       if (data.success) {
         const assistantMessage = {
           role: 'system',
-          content: '',
+          content: data.data.content,
           timestamp: Date.now()
         };
 
@@ -171,22 +171,6 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
           messages: [...prev.messages, assistantMessage]
         }));
 
-        const messageTokens = data.data.content.split(' ');
-
-        messageTokens.forEach((_, i) => {
-          const timeout = setTimeout(() => {
-            const updatedContent = messageTokens.slice(0, i + 1).join(' ');
-            setSelectedChat((prev) => {
-              const updatedMessages = [...prev.messages];
-              updatedMessages[updatedMessages.length - 1] = {
-                ...assistantMessage,
-                content: updatedContent
-              };
-              return { ...prev, messages: updatedMessages };
-            });
-          }, i * 100);
-          timeouts.current.push(timeout);
-        });
       } else {
         toast.error(data.message);
         setPrompt(trimmedPrompt);
