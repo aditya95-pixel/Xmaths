@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import Prism from 'prismjs';
 import toast from 'react-hot-toast'
+import Mermaid from './Mermaid'
 
 const Message = ({role,content}) => {
     useEffect(()=>{
@@ -59,6 +60,20 @@ const Message = ({role,content}) => {
                                         components={{
                                             p: ({node, ...props}) => <p className="mb-4" {...props} />,
                                             li: ({node, ...props}) => <li className="mb-2" {...props} />,
+                                            code({ node, inline, className, children, ...props }) {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                const codeValue = String(children).replace(/\n$/, '');
+
+                                                if (!inline && match && match[1] === 'mermaid') {
+                                                    return <Mermaid chart={codeValue} />;
+                                                }
+
+                                                return (
+                                                    <code className={className} {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            }
                                         }}
                                     />
                                     </div>

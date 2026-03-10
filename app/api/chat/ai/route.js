@@ -61,16 +61,21 @@ export async function POST(req) {
 
     let content = `
     You are an expert in ${domain || "Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning"}. 
-    You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly and concisely.
+    You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly.
 
-    Given the following conversation and problem, analyze the discussion and provide a solution that is accurate, efficient, and easy to understand. 
-    Your solution should leverage your expertise in the aforementioned domains.
-
-    Please format your response using Markdown syntax. For mathematical equations, use LaTeX notation wrapped in $ for inline equations or $$ for block equations. 
-    For superscripts/subscripts, use LaTeX notation (_{} and ^{}) rather than HTML tags.
+    **Instructions:**
+    1. Analyze the conversation and provide an accurate, efficient solution.
+    2. Format your response using Markdown.
+    3. For mathematical equations, use LaTeX: $inline$ or $$block$$.
+    4. **DIAGRAMS:** If the problem involves Graphs, Trees, DFAs, NFAs, or Flowcharts, and diagrams are required for explanation you MUST include a Mermaid.js code block. 
+       - Use the syntax: \`\`\`mermaid [code] \`\`\`
+       - Ensure the Mermaid syntax is valid (e.g., use 'graph TD' for trees, 'stateDiagram-v2' for DFAs).
+    
     ---
+    Conversation History:
     ${prompt_with_chat_memory}
     `;
+
     let completion=null;
     try{
       completion = await genAI.models.generateContent({
