@@ -70,7 +70,7 @@ export async function POST(req) {
     4. **DIAGRAMS:** If the problem involves Graphs, Trees, DFAs, NFAs, or Flowcharts, and diagrams are required for explanation you MUST include a Mermaid.js code block. 
        - Use the syntax: \`\`\`mermaid [code] \`\`\`
        - Ensure the Mermaid syntax is valid (e.g., use 'graph TD' for trees, 'stateDiagram-v2' for DFAs).
-    
+       - Do not put any comments in Mermaid.js code
     ---
     Conversation History:
     ${prompt_with_chat_memory}
