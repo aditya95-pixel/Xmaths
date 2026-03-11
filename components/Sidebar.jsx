@@ -27,13 +27,19 @@ const Sidebar = ({expand,setExpand}) => {
                     </div>
                 </div>
             </div>
-            <div onClick={user ? null : openSignIn}
-            className={`flex items-center ${expand ? 'hover:bg-white/10 rounded-lg mt-5 mb-5': 'justify-center w-full mt-5 mb-5'} gap-3 dark:text-white/100 text-sm p-2 cursor-pointer`}>
-                { user ?  <UserButton/> : <Image src={assets.profile_icon} alt="" className='w-7'/>}
-                {expand && <span>My Profile</span>}
-            </div>
-            <div className='ml-4.5'>
-                <ModeToggle></ModeToggle>
+            <div className={`flex items-center mt-5 mb-5 ${expand ? 'justify-between' : 'justify-center'}`}>
+                
+                <div
+                    onClick={user ? null : openSignIn}
+                    className={`flex items-center gap-3 dark:text-white/100 text-sm p-2 cursor-pointer
+                    ${expand ? 'hover:bg-white/10 rounded-lg' : 'justify-center'}`}
+                >
+                    {user ? <UserButton/> : <Image src={assets.profile_icon} alt="" className='w-7'/>}
+                    {expand && <span>My Profile</span>}
+                </div>
+
+                {expand && <ModeToggle />}
+
             </div>
             <button onClick={createNewChat} className={`mt-8 flex items-center justify-center cursor-pointer
                 ${expand ? "dark:bg-black bg-gray-400 hover:opacity-90 rounded-2xl gap-2 p-2.5 w-max" : 
