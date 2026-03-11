@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 mermaid.initialize({
   startOnLoad: true,
-  theme: "dark", // You can switch this based on your app's theme
+  theme: "dark", 
   securityLevel: "loose",
   fontFamily: "inherit",
 });
@@ -17,7 +17,6 @@ const Mermaid = ({ chart }) => {
   useEffect(() => {
     const renderDiagram = async () => {
       try {
-        // Generate a unique ID to avoid collisions in a list of messages
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
         const { svg } = await mermaid.render(id, chart);
         setSvg(svg);

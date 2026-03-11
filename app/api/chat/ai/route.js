@@ -67,7 +67,7 @@ export async function POST(req) {
     1. Analyze the conversation and provide an accurate, efficient solution.
     2. Format your response using Markdown.
     3. For mathematical equations, use LaTeX: $inline$ or $$block$$.
-    4. **DIAGRAMS:** If the problem involves Graphs, Trees, DFAs, NFAs, or Flowcharts, and diagrams are required for explanation you MUST include a Mermaid.js code block. 
+    4. **DIAGRAMS:** If the problem involves Graphs, Trees, DFAs, NFAs, or Flowcharts, and diagrams are required for explanation you MUST include a Mermaid.js v11.13.0 code block. 
        - Use the syntax: \`\`\`mermaid [code] \`\`\`
        - Ensure the Mermaid syntax is valid (e.g., use 'graph TD' for trees, 'stateDiagram-v2' for DFAs).
        - Do not put any comments in Mermaid.js code
@@ -76,33 +76,34 @@ export async function POST(req) {
     ${prompt_with_chat_memory}
     `;
 
-    let completion=null;
-    try{
-      completion = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-          {
-          role: "user",
-          parts: [
-              { text: content },
-              ...(geminiImagePart ? [geminiImagePart] : []), // attach image if exists
+    const modelsToTry = [
+      "gemini-3-flash-preview",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemma-3-27b-it"
+    ];
+    let completion = null;
+    for (const modelName of modelsToTry) {
+      try {
+        completion = await genAI.models.generateContent({
+          model: modelName,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                { text: content },
+                ...(geminiImagePart ? [geminiImagePart] : []),
+              ],
+            },
           ],
-          },
-      ],
-      });
-    }catch(error){
-      completion = await genAI.models.generateContent({
-      model: "gemma-3-27b-it",
-      contents: [
-          {
-          role: "user",
-          parts: [
-              { text: content },
-              ...(geminiImagePart ? [geminiImagePart] : []), // attach image if exists
-          ],
-          },
-      ],
-      });
+        });
+        break; 
+      } catch (error) {
+        console.error(`Failed with ${modelName}:`, error.message);
+        if (modelName === modelsToTry[modelsToTry.length - 1]) {
+          throw new Error("All models failed to generate content.");
+        }
+      }
     }
 
     const message = completion.text;
