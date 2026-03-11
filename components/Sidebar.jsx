@@ -27,6 +27,11 @@ const Sidebar = ({expand,setExpand}) => {
                     </div>
                 </div>
             </div>
+            <div onClick={user ? null : openSignIn}
+            className={`flex items-center ${expand ? 'hover:bg-white/10 rounded-lg mt-5 mb-5': 'justify-center w-full mt-105'} gap-3 dark:text-white/100 text-sm p-2 cursor-pointer`}>
+                { user ?  <UserButton/> : <Image src={assets.profile_icon} alt="" className='w-7'/>}
+                {expand && <span>My Profile</span>}
+            </div>
             <div className='ml-4.5'>
                 <ModeToggle></ModeToggle>
             </div>
@@ -44,11 +49,6 @@ const Sidebar = ({expand,setExpand}) => {
             <div className={`mt-8 dark:text-white/100 text-sm ${expand ? "block":"hidden"}`}>
                 <p className='my-1'>Recents</p>
                 {chats.map((chat,index)=><ChatLabel key={index} name={chat.name} id={chat._id} openMenu={openMenu} setOpenMenu={setOpenMenu}/>)}
-            </div>
-            <div onClick={user ? null : openSignIn}
-            className={`flex items-center ${expand ? 'hover:bg-white/10 rounded-lg mt-105': 'justify-center w-full mt-105'} gap-3 dark:text-white/100 text-sm p-2 cursor-pointer`}>
-                { user ?  <UserButton/> : <Image src={assets.profile_icon} alt="" className='w-7'/>}
-                {expand && <span>My Profile</span>}
             </div>
         </div>
     </div>
