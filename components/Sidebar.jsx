@@ -28,7 +28,7 @@ const Sidebar = ({expand,setExpand}) => {
                 </div>
             </div>
             <div onClick={user ? null : openSignIn}
-            className={`flex items-center ${expand ? 'hover:bg-white/10 rounded-lg mt-5 mb-5': 'justify-center w-full mt-105'} gap-3 dark:text-white/100 text-sm p-2 cursor-pointer`}>
+            className={`flex items-center ${expand ? 'hover:bg-white/10 rounded-lg mt-5 mb-5': 'justify-center w-full mt-5 mb-5'} gap-3 dark:text-white/100 text-sm p-2 cursor-pointer`}>
                 { user ?  <UserButton/> : <Image src={assets.profile_icon} alt="" className='w-7'/>}
                 {expand && <span>My Profile</span>}
             </div>
