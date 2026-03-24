@@ -19,3 +19,20 @@ export async function GET(request) {
     return NextResponse.json({ error: "Failed to fetch resources" }, { status: 500 });
   }
 }
+
+export async function POST(request) {
+  try {
+    await connectDB();
+    const body = await request.json();
+    const newResource = await Resource.create(body);
+    return NextResponse.json(
+      { message: "Resource created!", data: newResource }, 
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create resource", details: error.message }, 
+      { status: 400 }
+    );
+  }
+}
