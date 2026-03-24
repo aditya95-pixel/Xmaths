@@ -82,6 +82,7 @@ export async function POST(req) {
       "gemini-2.0-flash",
       "gemma-3-27b-it"
     ];
+    
     let completion = null;
     for (const modelName of modelsToTry) {
       try {
