@@ -9,7 +9,7 @@ import Link from 'next/link' // 1. Import Link
 
 const Sidebar = ({ expand, setExpand }) => {
     const { openSignIn } = useClerk();
-    const { user, chats, createNewChat } = useAppContext();
+    const { user, chats, isAdmin, createNewChat } = useAppContext();
     const [openMenu, setOpenMenu] = useState({ id: 0, open: false });
 
     return (
@@ -60,7 +60,7 @@ const Sidebar = ({ expand, setExpand }) => {
                 {/* -------------------------- */}
 
                 {/* --- NEW EXPLORE BUTTON --- */}
-                <Link href="/contribute_resources" className={`flex items-center justify-center cursor-pointer mb-2
+                {isAdmin && (<Link href="/contribute_resources" className={`flex items-center justify-center cursor-pointer mb-2
                     ${expand ? "dark:bg-black bg-gray-400 hover:opacity-90 rounded-2xl gap-2 p-2.5 w-full" :
                         "group relative h-9 w-9 mx-auto hover:bg-gray-500/30 rounded-lg"
                     }`}>
@@ -74,7 +74,7 @@ const Sidebar = ({ expand, setExpand }) => {
                     )}
                     
                     {expand && <p className='dark:text-white text font-medium text-sm'>Contribute</p>}
-                </Link>
+                </Link>)}
                 {/* -------------------------- */}
 
                 <button onClick={createNewChat} className={`mt-2 flex items-center justify-center cursor-pointer

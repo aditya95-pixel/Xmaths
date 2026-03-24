@@ -6,52 +6,60 @@ import toast from "react-hot-toast";
 
 export const AppContext = createContext();
 
-export const useAppContext = () =>{
+export const useAppContext = () => {
     return useContext(AppContext);
 }
 
-export const AppContextProvider = ({children})=>{
-    const {user} =useUser();
-    const {getToken}=useAuth();
-    const [chats,setChats]=useState([]);
-    const [selectedChat,setSelectedChat]=useState(null);
-    const createNewChat=async ()=>{
+export const AppContextProvider = ({ children }) => {
+    const { user } = useUser();
+    const { getToken } = useAuth();
+    const [chats, setChats] = useState([]);
+    const [selectedChat, setSelectedChat] = useState(null);
+
+    // --- NEW: Admin Logic ---
+    // Safely checks if the metadata role is set to 'admin'
+    const isAdmin = user?.publicMetadata?.role === 'admin';
+
+    const createNewChat = async () => {
         try {
-            if(!user) return null;
-            const token=await getToken();
-            await axios.post('/api/chat/create',{},{headers:{Authorization:`Bearer ${token}`}});
+            if (!user) return null;
+            const token = await getToken();
+            await axios.post('/api/chat/create', {}, { headers: { Authorization: `Bearer ${token}` } });
             fetchUsersChats();
         } catch (error) {
             toast.error(error.message);
         }
     }
-    const fetchUsersChats=async ()=>{
+
+    const fetchUsersChats = async () => {
         try {
-            const token=await getToken();
-            const {data}=await axios.get('/api/chat/get',{headers:{Authorization:`Bearer ${token}`}});
-            if(data.success){
-                setChats(data.data);
-                if(data.data.length===0){
+            const token = await getToken();
+            const { data } = await axios.get('/api/chat/get', { headers: { Authorization: `Bearer ${token}` } });
+            if (data.success) {
+                if (data.data.length === 0) {
                     await createNewChat();
-                    return fetchUsersChats();
-                }else{
-                    data.data.sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
-                    setSelectedChat(data.data[0]);
+                } else {
+                    const sortedChats = data.data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                    setChats(sortedChats);
+                    setSelectedChat(sortedChats[0]);
                 }
-            }else{
+            } else {
                 toast.error(data.message);
             }
         } catch (error) {
             toast.error(error.message);
         }
     }
-    useEffect(()=>{
-        if(user){
+
+    useEffect(() => {
+        if (user) {
             fetchUsersChats();
         }
-    },[user]);
-    const value={
+    }, [user]);
+
+    const value = {
         user,
+        isAdmin, // Expose this to the rest of the app
         chats,
         setChats,
         selectedChat,
