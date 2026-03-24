@@ -46,7 +46,7 @@ export default function MathematicsPage() {
 
   return (
     <div className="p-10 dark:text-white">
-      <h1 className="text-4xl font-bold mb-8">Mathematics for AI</h1>
+      <h1 className="text-4xl font-bold mb-8">Mathematics</h1>
 
       {loading ? (
         <p>Loading topics...</p>
