@@ -1,19 +1,26 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
-export default function DeepLearningPage() {
+export default function MathematicsPage() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openTopic, setOpenTopic] = useState(null);
 
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        // Fetching data for the deep-learning category
         const response = await fetch('/api/resources?category=deep-learning');
         const data = await response.json();
-        setResources(data);
+
+        if (response.ok && Array.isArray(data)) {
+          setResources(data);
+        } else {
+          console.error("Invalid API response:", data);
+          setResources([]);
+        }
       } catch (error) {
-        console.error("Error fetching Deep Learning resources:", error);
+        console.error("Error fetching resources:", error);
+        setResources([]);
       } finally {
         setLoading(false);
       }
@@ -22,65 +29,101 @@ export default function DeepLearningPage() {
     fetchResources();
   }, []);
 
+  const groupedResources = useMemo(() => {
+    return resources.reduce((acc, resource) => {
+      const topic = resource.topicName;
+      if (!acc[topic]) {
+        acc[topic] = [];
+      }
+      acc[topic].push(resource);
+      return acc;
+    }, {});
+  }, [resources]);
+
+  const toggleTopic = (topicName) => {
+    setOpenTopic((prev) => (prev === topicName ? null : topicName));
+  };
+
   return (
     <div className="p-10 dark:text-white">
-      {/* Header with Pulse Effect */}
-      <div className="flex items-center gap-4 mb-10">
-        <div className="relative flex h-10 w-10">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-10 w-10 bg-red-600 shadow-lg shadow-red-900/40"></span>
-        </div>
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">Deep Learning & Neural Networks</h1>
-          <p className="text-gray-400 mt-1">Exploring Transformers, CNNs, and Generative AI.</p>
-        </div>
-      </div>
+      <h1 className="text-4xl font-bold mb-8">Deep Learning</h1>
 
       {loading ? (
-        <div className="flex items-center gap-3 py-10">
-          <div className="w-6 h-6 border-t-2 border-red-500 rounded-full animate-spin"></div>
-          <p className="text-red-400 font-medium">Initializing Neural Networks...</p>
-        </div>
+        <p>Loading topics...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {resources.map((resource) => (
-            <div 
-              key={resource._id} 
-              className="group flex flex-col justify-between p-8 bg-zinc-900/40 border border-red-500/20 rounded-[2rem] hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/5"
-            >
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-red-400 mb-3 group-hover:text-red-300 transition-colors">
-                  {resource.topicName}
-                </h2>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {resource.description}
-                </p>
-              </div>
+        <div className="grid gap-6">
+          {Object.keys(groupedResources).length > 0 ? (
+            Object.entries(groupedResources).map(([topicName, topicResources]) => {
+              const isOpen = openTopic === topicName;
+              const totalLinks = topicResources.reduce(
+                (count, resource) => count + (resource.links?.length || 0),
+                0
+              );
 
-              <div className="flex flex-col gap-2">
-                {resource.links.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between w-full bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 px-5 py-3 rounded-xl text-sm font-semibold transition-all group/btn"
+              return (
+                <section
+                  key={topicName}
+                  className="bg-blue-500/10 border border-blue-500/20 rounded-2xl overflow-hidden"
+                >
+                  {/* Accordion Header */}
+                  <button
+                    onClick={() => toggleTopic(topicName)}
+                    className="w-full flex items-center justify-between px-6 py-6 text-left hover:bg-blue-500/5 transition-colors"
                   >
-                    <span className="flex items-center gap-2">
-                      {link.type === 'video' ? '📽️' : '🧠'}
-                      {link.title}
-                    </span>
-                    <span className="opacity-0 group-hover/btn:opacity-100 transition-opacity">→</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
+                    <div>
+                      <h2 className="text-xl font-semibold">{topicName}</h2>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {topicResources.length} subtopic{topicResources.length > 1 ? "s" : ""} • {totalLinks} resource{totalLinks > 1 ? "s" : ""}
+                      </p>
+                    </div>
 
-          {!loading && resources.length === 0 && (
-            <div className="col-span-full py-20 text-center border border-dashed border-zinc-800 rounded-[2rem]">
-              <p className="text-gray-500">The Neural Network is empty.</p>
-            </div>
+                    <span
+                      className={`text-3xl font-light text-blue-400 transition-transform duration-300 ${
+                        isOpen ? "rotate-45" : "rotate-0"
+                      }`}
+                    >
+                      +
+                    </span>
+                  </button>
+
+                  {/* Accordion Content */}
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-6 pb-6 space-y-5">
+                        {topicResources.map((resource) => (
+                          <div
+                            key={resource._id}
+                            className="border-t border-blue-500/10 pt-5 first:border-t first:border-blue-500/10"
+                          >
+                            <p className="text-gray-300 mb-4">{resource.description}</p>
+
+                            <div className="flex flex-wrap gap-3">
+                              {resource.links?.map((link, idx) => (
+                                <a
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                >
+                                  {link.title} ({link.type})
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              );
+            })
+          ) : (
+            <p>No resources found for this category.</p>
           )}
         </div>
       )}
