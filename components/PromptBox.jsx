@@ -108,6 +108,21 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     }
   };
 
+  const handlePaste = (e) => {
+    const items = Array.from(e.clipboardData?.items || []);
+    const imageItem = items.find((item) => item.type.startsWith('image/'));
+    if (!imageItem) return;
+
+    const file = imageItem.getAsFile();
+    if (!file) return;
+
+    const hasText = items.some((item) => item.type === 'text/plain');
+    if (!hasText) e.preventDefault();
+
+    setSelectedImage(file);
+    toast.success('Image pasted');
+  };
+
   const sendPrompt = async (e) => {
     e.preventDefault();
     const trimmedPrompt = prompt.trim();
@@ -192,6 +207,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     >
       <textarea
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         className="outline-none w-full resize-none overflow-hidden break-words bg-transparent"
         rows={2}
         placeholder="Message Xmaths"
