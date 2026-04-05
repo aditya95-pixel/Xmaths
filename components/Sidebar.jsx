@@ -59,7 +59,25 @@ const Sidebar = ({ expand, setExpand }) => {
                 </Link>
                 {/* -------------------------- */}
 
-                {/* --- NEW EXPLORE BUTTON --- */}
+                {/* --- NEW QUIZ BUTTON --- */}
+                <Link href="/take_quiz" className={`flex items-center justify-center cursor-pointer mb-2
+                    ${expand ? "dark:bg-black bg-gray-400 hover:opacity-90 rounded-2xl gap-2 p-2.5 w-full" :
+                        "group relative h-9 w-9 mx-auto hover:bg-gray-500/30 rounded-lg"
+                    }`}>
+                    {/* You can replace assets.menu_icon with a specific explore/web icon */}
+                    <Image className={expand ? 'w-5' : 'w-6'} src={assets.menu_icon} alt="" />
+                    
+                    {!expand && (
+                        <div className='absolute w-max left-12 opacity-0 group-hover:opacity-100 transition dark:bg-black dark:text-white text-sm px-3 py-2 rounded-lg shadow-lg pointer-events-none'>
+                            Take Quiz
+                        </div>
+                    )}
+                    
+                    {expand && <p className='dark:text-white text font-medium text-sm'>Take a Quiz</p>}
+                </Link>
+                {/* -------------------------- */}
+
+                {/* --- NEW CONTRIBUTE BUTTON --- */}
                 {isAdmin && (<Link href="/contribute_resources" className={`flex items-center justify-center cursor-pointer mb-2
                     ${expand ? "dark:bg-black bg-gray-400 hover:opacity-90 rounded-2xl gap-2 p-2.5 w-full" :
                         "group relative h-9 w-9 mx-auto hover:bg-gray-500/30 rounded-lg"
