@@ -1,12 +1,17 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import Link from "next/link"; 
-
+import Image from "next/image"; // Added missing import
+import { useClerk, UserButton } from '@clerk/nextjs';
+import { useAppContext } from '@/context/AppContext';
+import { assets } from "@/assets/assets"; // Ensure this path is correct
 
 export default function Home() {
+  const { openSignIn } = useClerk();
   const canvasRef = useRef(null);
   const router = useRouter();
+  const { user } = useAppContext();
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -23,6 +28,7 @@ export default function Home() {
 
     const draw = () => {
       const ctx = canvas.getContext("2d");
+      if (!ctx) return;
       const W = canvas.width;
       const H = canvas.height;
 
@@ -46,17 +52,12 @@ export default function Home() {
         Math.sin(cx * Math.PI * 6 + time * 0.4) * 14;
 
       const getColor = (xNorm, opacity) => {
-        // Starts Red (255) on the left, fades as it moves right
         const r = Math.round(255 - (200 * xNorm)); 
-        
         const g = Math.round(20 * (1 - xNorm)); 
-        
-        // Starts Low, ends at a strong Blue (175)
         const b = Math.round(50 + (125 * xNorm)); 
-
         return `rgba(${r}, ${g}, ${b}, ${opacity})`;
       };
-      // horizontal lines (across columns)
+
       for (let row = 0; row < ROWS; row++) {
         const rz = (row / (ROWS - 1)) * GRID_D;
         const depthOpacity = 0.2 + (row / ROWS) * 0.65;
@@ -76,7 +77,6 @@ export default function Home() {
         }
       }
 
-      // depth lines (across rows)
       for (let col = 0; col < COLS; col++) {
         const xNorm = col / (COLS - 1);
         const x = (xNorm - 0.5) * GRID_W;
@@ -111,6 +111,21 @@ export default function Home() {
 
   return (
     <main className="landing-root">
+      {/* - NavBar - */}
+     <nav className="fixed top-0 right-0 left-0 flex justify-end items-center p-6 z-50">
+      <div className="nav-auth">
+        {user ? (
+          <UserButton/>
+        ) : (
+          <button 
+            onClick={() => openSignIn()}
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/20 backdrop-blur-md"
+          >
+            Login
+          </button>
+        )}
+      </div>
+    </nav>
       {/* ── Hero ── */}
       <section className="hero-section">
         <div className="hero-content">
@@ -126,18 +141,21 @@ export default function Home() {
             linear algebra, and beyond.
           </p>
 
-          <div className="hero-actions">
-            <button 
-              onClick={() => router.push("/chat_window")} className="btn-get-started">
-              Chat now!
-             </button>
-            <button 
-              onClick={() => router.push("/learning_path")} 
-              className="btn-ecosystems"
-            >
-              Learn
-            </button>
-          </div>
+          {/* Only show actions if user is logged in */}
+          {user && (
+            <div className="hero-actions">
+              <button 
+                onClick={() => router.push("/chat_window")} className="btn-get-started">
+                Chat now!
+              </button>
+              <button 
+                onClick={() => router.push("/learning_path")} 
+                className="btn-ecosystems"
+              >
+                Learn
+              </button>
+            </div>
+          )}
         </div>
         <canvas ref={canvasRef} className="wave-canvas" />
       </section>
