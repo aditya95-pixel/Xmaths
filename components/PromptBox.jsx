@@ -200,151 +200,165 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
   const hasContent = prompt.trim() || selectedImage;
 
   return (
-    <form
-      onSubmit={sendPrompt}
-      className={`w-full ${
-        selectedChat?.messages.length > 0 ? 'max-w-4xl' : 'max-w-3xl'
-      } relative rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.45)] transition-all duration-300 overflow-visible`}
-    >
-      {/* subtle top highlight */}
-      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+  <form
+    onSubmit={sendPrompt}
+    className={`w-full ${
+      selectedChat?.messages.length > 0 ? 'max-w-4xl' : 'max-w-3xl'
+    } relative overflow-visible rounded-[28px] border transition-all duration-300
+      bg-white border-gray-200 shadow-[0_12px_40px_rgba(0,0,0,0.12)]
+      dark:bg-[#111318] dark:border-white/10 dark:shadow-[0_10px_35px_rgba(0,0,0,0.55)]`}
+  >
+    {/* top highlight */}
+    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-white/10" />
 
-      <div className="p-4 md:p-5">
-        {/* Domain chip row (only show when selected) */}
-        {selectedDomain && (
-          <div className="mb-3 flex items-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs md:text-sm text-red-200">
-              <span className="h-2 w-2 rounded-full bg-red-400" />
-              {selectedDomain}
-            </span>
-          </div>
-        )}
-
-        {/* Textarea */}
-        <textarea
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          className="w-full resize-none overflow-hidden break-words bg-transparent outline-none text-sm md:text-base text-white placeholder:text-white/45 min-h-[24px] md:min-h-[28px] leading-6"
-          rows={1}
-          placeholder="Ask XMaths anything... solve a problem, explain a concept, or generate a quiz"
-          required={!selectedImage}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-        />
-
-        {/* Image Preview */}
-        {selectedImage && (
-          <div className="relative mt-3 inline-block">
-            <div className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-1">
-              <img
-                src={URL.createObjectURL(selectedImage)}
-                alt="Preview"
-                className="w-24 h-24 md:w-28 md:h-28 object-cover rounded-xl"
-              />
-              <button
-                type="button"
-                onClick={removeImage}
-                className="absolute -top-2 -right-2 bg-black/80 border border-white/10 rounded-full p-1.5 hover:bg-black transition"
-              >
-                <X size={14} color="white" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Bottom toolbar */}
-        <div className="mt-4 flex items-center justify-between gap-3 relative">
-          <div className="flex items-center gap-2">
-            {/* Image Upload */}
-            <button
-              type="button"
-              onClick={handleFileClick}
-              className="h-10 w-10 rounded-full border border-white/10 bg-white/[0.05] flex items-center justify-center text-white/80 hover:bg-white/[0.08] hover:text-white transition"
-              aria-label="Attach file"
-            >
-              <Paperclip size={18} />
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-
-            {/* Voice Input */}
-            <button
-              type="button"
-              onClick={handleVoiceInput}
-              className={`h-10 w-10 rounded-full border flex items-center justify-center transition ${
-                isRecording
-                  ? 'bg-red-600 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.35)]'
-                  : 'border-white/10 bg-white/[0.05] text-white/80 hover:bg-white/[0.08] hover:text-white'
-              }`}
-              aria-label="Voice input"
-            >
-              <Mic size={18} color="white" />
-            </button>
-
-            {/* Dropdown Button */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen((prev) => !prev)}
-                className="h-10 w-10 rounded-full border border-white/10 bg-white/[0.05] hover:bg-white/[0.08] flex items-center justify-center transition"
-                aria-label="Select domain"
-              >
-                <MoreVertical size={18} color="white" />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="absolute bottom-14 left-0 z-50 w-64 rounded-2xl border border-white/10 bg-[#111114]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-                  <div className="px-4 py-3 border-b border-white/5 text-xs uppercase tracking-wider text-white/40">
-                    Select domain
-                  </div>
-                  <ul className="flex flex-col py-2">
-                    {['Mathematics', 'Algorithms', 'Linear Algebra', 'Machine Learning', 'Deep Learning'].map((item) => (
-                      <li
-                        key={item}
-                        className="px-4 py-3 hover:bg-white/[0.05] cursor-pointer flex justify-between items-center text-sm text-white/85 transition"
-                        onClick={() => {
-                          setSelectedDomain(item);
-                          setIsDropdownOpen(false);
-                        }}
-                      >
-                        <span>{item}</span>
-                        {selectedDomain === item && (
-                          <Check size={18} className="text-red-400" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Send Button */}
-          <button
-            type="submit"
-            className={`h-11 w-11 rounded-full flex items-center justify-center transition-all duration-200 ${
-              hasContent
-                ? 'bg-gradient-to-r from-red-500 via-rose-500 to-red-600 shadow-[0_0_24px_rgba(239,68,68,0.25)] hover:scale-105'
-                : 'bg-white/[0.05] border border-white/10 opacity-70'
-            }`}
-            disabled={isLoading}
-            aria-label="Send message"
-          >
-            <Image
-              className="w-4 h-4"
-              src={hasContent ? assets.arrow_icon : assets.arrow_icon_dull}
-              alt="Send message"
-            />
-          </button>
+    <div className="p-4 md:p-5">
+      {/* Domain chip */}
+      {selectedDomain && (
+        <div className="mb-3 flex items-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs md:text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+            <span className="h-2 w-2 rounded-full bg-red-500 dark:bg-red-400" />
+            {selectedDomain}
+          </span>
         </div>
-      </div>
-    </form>
-  );
-};
+      )}
 
+      {/* Textarea */}
+      <textarea
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        className="w-full resize-none overflow-hidden break-words bg-transparent outline-none text-sm md:text-base min-h-[24px] md:min-h-[28px] leading-6 text-gray-900 placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/40"
+        rows={1}
+        placeholder="Ask XMaths anything... solve a problem, explain a concept, or generate a quiz"
+        required={!selectedImage}
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+      />
+
+      {/* Image Preview */}
+      {selectedImage && (
+        <div className="relative mt-3 inline-block">
+          <div className="relative rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-white/10 dark:bg-[#1a1d24]">
+            <img
+              src={URL.createObjectURL(selectedImage)}
+              alt="Preview"
+              className="w-24 h-24 md:w-28 md:h-28 object-cover rounded-xl"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute -top-2 -right-2 rounded-full p-1.5 bg-black text-white border border-black/10 hover:bg-gray-900 transition dark:bg-black dark:border-white/10"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom toolbar */}
+      <div className="mt-4 flex items-center justify-between gap-3 relative">
+        <div className="flex items-center gap-2">
+          {/* Image Upload */}
+          <button
+            type="button"
+            onClick={handleFileClick}
+            className="h-10 w-10 rounded-full border flex items-center justify-center transition
+              border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900
+              dark:border-white/10 dark:bg-[#1a1d24] dark:text-white/80 dark:hover:bg-[#222630] dark:hover:text-white"
+            aria-label="Attach file"
+          >
+            <Paperclip size={18} />
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* Voice Input */}
+          <button
+            type="button"
+            onClick={handleVoiceInput}
+            className={`h-10 w-10 rounded-full border flex items-center justify-center transition ${
+              isRecording
+                ? 'bg-red-600 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.35)] text-white'
+                : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:border-white/10 dark:bg-[#1a1d24] dark:text-white/80 dark:hover:bg-[#222630] dark:hover:text-white'
+            }`}
+            aria-label="Voice input"
+          >
+            <Mic size={18} />
+          </button>
+
+          {/* Domain Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              className="h-10 w-10 rounded-full border flex items-center justify-center transition
+                border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900
+                dark:border-white/10 dark:bg-[#1a1d24] dark:text-white/80 dark:hover:bg-[#222630] dark:hover:text-white"
+              aria-label="Select domain"
+            >
+              <MoreVertical size={18} />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute bottom-14 left-0 z-50 w-64 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#151922]">
+                <div className="px-4 py-3 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 dark:border-white/5 dark:text-white/40">
+                  Select domain
+                </div>
+
+                <ul className="flex flex-col py-2">
+                  {[
+                    'Mathematics',
+                    'Algorithms',
+                    'Linear Algebra',
+                    'Machine Learning',
+                    'Deep Learning',
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      className="px-4 py-3 cursor-pointer flex justify-between items-center text-sm transition
+                        text-gray-700 hover:bg-gray-50
+                        dark:text-white/85 dark:hover:bg-white/[0.04]"
+                      onClick={() => {
+                        setSelectedDomain(item);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <span>{item}</span>
+                      {selectedDomain === item && (
+                        <Check size={18} className="text-red-500 dark:text-red-400" />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Send Button */}
+        <button
+          type="submit"
+          className={`h-11 w-11 rounded-full flex items-center justify-center transition-all duration-200 ${
+            hasContent
+              ? 'bg-gradient-to-r from-red-500 via-rose-500 to-red-600 shadow-[0_0_24px_rgba(239,68,68,0.25)] hover:scale-105'
+              : 'bg-gray-100 border border-gray-200 opacity-80 dark:bg-[#1a1d24] dark:border-white/10 dark:opacity-80'
+          }`}
+          disabled={isLoading}
+          aria-label="Send message"
+        >
+          <Image
+            className="w-4 h-4"
+            src={hasContent ? assets.arrow_icon : assets.arrow_icon_dull}
+            alt="Send message"
+          />
+        </button>
+      </div>
+    </div>
+  </form>
+);}
 export default PromptBox;

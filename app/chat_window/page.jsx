@@ -49,8 +49,8 @@ export default function ChatWindow() {
         </div>
 
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-3 dark:bg-black px-4 py-2">
+          <div className="flex flex-col items-center mb-8">
+            <div className="flex items-center gap-3 dark:bg-black px-4 py-6">
               <Image src={assets.logo_icon} alt="Logo" className="h-10" />
               <p className="text-2xl font-medium">
                 Hello I am  
