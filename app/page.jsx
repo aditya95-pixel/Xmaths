@@ -60,12 +60,16 @@ export default function Home() {
         Math.sin(cx * Math.PI * 6 + time * 0.4) * 14;
 
       const getColor = (xNorm, opacity) => {
-        const r = Math.round(200 * (1 - xNorm));
-        const g = Math.round(xNorm * 220);
-        const b = Math.round(255 - xNorm * 55);
-        return `rgba(${r},${g},${b},${opacity})`;
-      };
+        // Starts Red (255) on the left, fades as it moves right
+        const r = Math.round(255 - (200 * xNorm)); 
+        
+        const g = Math.round(20 * (1 - xNorm)); 
+        
+        // Starts Low, ends at a strong Blue (175)
+        const b = Math.round(50 + (125 * xNorm)); 
 
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      };
       // horizontal lines (across columns)
       for (let row = 0; row < ROWS; row++) {
         const rz = (row / (ROWS - 1)) * GRID_D;
@@ -157,21 +161,19 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-content">
           <h1 className="hero-heading">
-            <span className="hero-gradient-text">A Fast Blockchain.</span>
+            <span className="hero-gradient-text">Xmaths</span>
             <br />
-            <span className="hero-white-text">Scalable AI.</span>
+            <span className="hero-white-text">AI Problem Solving Platform</span>
           </h1>
 
           <p className="hero-description">
-            Our technology performing fast blockchain (120K TPS) and it has guaranteed
-            <br />
-            AI-based data security. Proof of Stake, its consensus algorithm enables
-            <br />
-            unlimited speeds.
+            A structured learning platform for mastering the mathematics behind data structures, algorithms,
+            machine learning and AI — from algebra and calculus to probability,
+            linear algebra, and beyond.
           </p>
 
           <div className="hero-actions">
-            <button className="btn-get-started">Get started</button>
+            <button className="btn-get-started">Chat now!</button>
             <button className="btn-ecosystems">Ecosystems</button>
           </div>
         </div>
