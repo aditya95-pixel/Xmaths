@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import Image from "next/image"; // Added missing import
+import Image from "next/image"; 
 import { useClerk, UserButton } from '@clerk/nextjs';
 import { useAppContext } from '@/context/AppContext';
-import { assets } from "@/assets/assets"; // Ensure this path is correct
+import { assets } from "@/assets/assets"; 
+import { motion } from "framer-motion"; 
 
 export default function Home() {
   const { openSignIn } = useClerk();
@@ -97,7 +98,7 @@ export default function Home() {
         }
       }
 
-      time += 0.012;
+      time += 0.006; // Slowed down the wave animation slightly
       animId = requestAnimationFrame(draw);
     };
 
@@ -109,6 +110,28 @@ export default function Home() {
     };
   }, []);
 
+  // Container variant handles the delay between each child element
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3, // 0.3 seconds delay between each element appearing
+        delayChildren: 0.2,   // Initial delay before the first element starts
+      }
+    }
+  };
+
+  // Item variant controls the actual slide up and fade in for individual pieces
+  const itemVariants = {
+    hidden: { opacity: 0, y: 50 },
+    show: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.8, ease: "easeOut" } 
+    }
+  };
+
   return (
     <main className="landing-root">
       {/* - NavBar - */}
@@ -118,9 +141,8 @@ export default function Home() {
           <UserButton/>
         ) : (
           <button 
-            onClick={() => openSignIn()}
-            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/20 backdrop-blur-md"
-          >
+            onClick={() =>router.push("/sign-in")}
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/20 backdrop-blur-md"          >
             Login
           </button>
         )}
@@ -128,22 +150,36 @@ export default function Home() {
     </nav>
       {/* ── Hero ── */}
       <section className="hero-section">
-        <div className="hero-content">
+        
+        {/* Parent container triggering the staggered children */}
+        <motion.div 
+          className="hero-content"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
           <h1 className="hero-heading">
-            <span className="hero-gradient-text">Xmaths</span>
+            {/* Element 1 */}
+            <motion.span variants={itemVariants} style={{ display: 'inline-block' }}>
+              <span className="hero-gradient-text">Xmaths</span>
+            </motion.span>
             <br />
-            <span className="hero-white-text">AI Problem Solving Platform</span>
+            {/* Element 2 */}
+            <motion.span variants={itemVariants} style={{ display: 'inline-block' }}>
+              <span className="hero-white-text">AI Problem Solving Platform</span>
+            </motion.span>
           </h1>
 
-          <p className="hero-description">
+          {/* Element 3 */}
+          <motion.p variants={itemVariants} className="hero-description">
             A structured learning platform for mastering the mathematics behind data structures, algorithms,
             machine learning and AI — from algebra and calculus to probability,
             linear algebra, and beyond.
-          </p>
+          </motion.p>
 
-          {/* Only show actions if user is logged in */}
+          {/* Element 4 (Only if logged in) */}
           {user && (
-            <div className="hero-actions">
+            <motion.div variants={itemVariants} className="hero-actions">
               <button 
                 onClick={() => router.push("/chat_window")} className="btn-get-started">
                 Chat now!
@@ -154,9 +190,10 @@ export default function Home() {
               >
                 Learn
               </button>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
+        
         <canvas ref={canvasRef} className="wave-canvas" />
       </section>
     </main>

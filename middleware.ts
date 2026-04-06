@@ -1,12 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isProtectedRoute = createRouteMatcher([
-  '/learning_path(.*)',
-  '/chat_window(.*)',
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/sso-callback(.*)' // Crucial for Google login to work
 ]);
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    // This will redirect unauthenticated users to the sign-in page
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
     await auth.protect();
   }
 });
