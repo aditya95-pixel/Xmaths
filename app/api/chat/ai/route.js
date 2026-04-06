@@ -59,23 +59,23 @@ export async function POST(req) {
     };
     }
 
-    let content = `
-    You are an expert in ${domain || "Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning"}. 
-    You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly.
+let content = `
+ You are an expert in ${domain || "Mathematics, Algorithms, Linear Algebra, Machine Learning, and Deep Learning"}. 
+ You have a deep understanding of theoretical concepts, practical applications, and the ability to explain complex ideas clearly.
 
-    **Instructions:**
-    1. Analyze the conversation and provide an accurate, efficient solution.
-    2. Format your response using Markdown.
-    3. For mathematical equations, use LaTeX: $inline$ or $$block$$.
-    4. **DIAGRAMS:** If the problem involves Graphs, Trees, DFAs, NFAs, or Flowcharts, and diagrams are required for explanation you MUST include a Mermaid.js v11.13.0 code block. 
-       - Use the syntax: \`\`\`mermaid [code] \`\`\`
-       - Ensure the Mermaid syntax is valid (e.g., use 'graph TD' for trees, 'stateDiagram-v2' for DFAs).
-       - Do not put any comments in Mermaid.js code
+ **Instructions:**
+ 1. Analyze the conversation and provide an accurate, efficient solution.
+ 2. Format your response using standard Markdown.
+   - **TABLES:** If question needs generating a table, you MUST use proper line breaks after the header, the separator line, and every individual row. Never output a table on a single continuous line.
+ 3. For mathematical equations, use LaTeX: $inline$ or $$block$$.
+ 4. **DIAGRAMS (USE WHEN AND IF NECESSARY):**        - ONLY generate a Mermaid.js diagram if the problem fundamentally requires visual mapping to be understood (e.g., tracing a complex graph algorithm, defining a DFA/NFA state machine, or visualizing an intricate tree data structure).
+   - Do NOT generate diagrams for basic algebra, simple logical steps, general text explanations, or standard code structure where a diagram adds no new informative value.
+   - If a diagram is strictly necessary, use valid Mermaid.js v11.13.0 syntax inside a \`\`\`mermaid code block.
+   - Do not put any comments in the Mermaid.js code.
     ---
-    Conversation History:
-    ${prompt_with_chat_memory}
-    `;
-
+Conversation History:
+  ${prompt_with_chat_memory}
+  `;
     const modelsToTry = [
       "gemini-3-flash-preview",
       "gemini-2.5-flash",
