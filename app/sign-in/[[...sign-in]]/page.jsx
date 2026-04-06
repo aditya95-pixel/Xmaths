@@ -3,19 +3,18 @@
 import { useState } from 'react';
 import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // Added Next.js Link import
 
 export default function CustomSignIn() {
   const { isLoaded, signIn, setActive } = useSignIn();
   const router = useRouter();
 
-  // Form State
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // --- GOOGLE OAUTH HANDLER ---
   const handleGoogleSignIn = async () => {
     if (!isLoaded) return;
     setIsGoogleLoading(true);
@@ -23,7 +22,7 @@ export default function CustomSignIn() {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/', // Change this to your app's home route
+        redirectUrlComplete: '/',
       });
     } catch (err) {
       console.error(err);
@@ -32,7 +31,6 @@ export default function CustomSignIn() {
     }
   };
 
-  // --- EMAIL/PASSWORD HANDLER ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isLoaded) return;
@@ -48,7 +46,7 @@ export default function CustomSignIn() {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.push('/dashboard'); // Change this to your app's home route
+        router.push('/'); 
       } else {
         console.log("Sign in incomplete:", result);
         setError('Further verification is required.');
@@ -62,25 +60,25 @@ export default function CustomSignIn() {
   };
 
   return (
-    // Outer container with dark background and hidden overflow for background effects
-    <div className="relative flex min-h-screen items-center justify-center bg-[#09090b] px-4 sm:px-6 lg:px-8 overflow-hidden font-sans">
+    // Outer container: Pitch dark slate
+    <div className="relative flex min-h-screen items-center justify-center bg-[#020617] px-4 sm:px-6 lg:px-8 overflow-hidden font-sans selection:bg-cyan-500/30">
       
-      {/* --- ANIMATED BACKGROUND ORBS --- */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-screen filter blur-[120px] opacity-40 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-[120px] opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* --- DUO-TONE BACKGROUND ORBS --- */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/20 rounded-full mix-blend-screen filter blur-[150px] animate-pulse duration-1000"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[150px] animate-pulse duration-1000" style={{ animationDelay: '3s' }}></div>
 
       {/* --- GLASSMORPHISM CARD --- */}
-      <div className="relative z-10 w-full max-w-md p-8 backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl shadow-purple-900/20">
+      <div className="relative z-10 w-full max-w-md p-8 backdrop-blur-2xl bg-[#0f172a]/40 border border-slate-800 rounded-[2rem] shadow-[0_0_50px_-12px_rgba(6,182,212,0.15)]">
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">
+          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-tight">
             Welcome Back
           </h1>
-          <p className="text-sm text-zinc-400 mt-2">Log in to continue your journey</p>
+          <p className="text-sm text-slate-400 mt-2 font-medium">Log in to continue your journey</p>
         </div>
         
         {error && (
-          <div className="mb-6 p-3 text-sm text-red-400 bg-red-950/50 border border-red-900/50 rounded-xl text-center backdrop-blur-sm">
+          <div className="mb-6 p-3 text-sm text-red-400 bg-red-950/30 border border-red-900/50 rounded-xl text-center backdrop-blur-sm shadow-inner">
             {error}
           </div>
         )}
@@ -89,13 +87,13 @@ export default function CustomSignIn() {
         <button
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading || isEmailLoading}
-          className="w-full flex items-center justify-center px-4 py-3 mb-6 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
+          className="w-full flex items-center justify-center px-4 py-3.5 mb-6 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/50 text-slate-200 font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed group shadow-sm hover:shadow-cyan-500/10"
         >
           {isGoogleLoading ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <div className="w-5 h-5 border-2 border-slate-500 border-t-cyan-400 rounded-full animate-spin"></div>
           ) : (
             <>
-              <svg className="w-5 h-5 mr-3 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -108,15 +106,15 @@ export default function CustomSignIn() {
 
         {/* --- DIVIDER --- */}
         <div className="flex items-center space-x-4 mb-6">
-          <div className="flex-1 h-px bg-white/10"></div>
-          <div className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Or email</div>
-          <div className="flex-1 h-px bg-white/10"></div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+          <div className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Or email</div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
         </div>
 
         {/* --- EMAIL/PASSWORD FORM --- */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5 ml-1">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-400 ml-1">
               Email
             </label>
             <input
@@ -124,13 +122,13 @@ export default function CustomSignIn() {
               required
               value={emailAddress}
               onChange={(e) => setEmailAddress(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-900/50 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-300"
+              className="w-full px-4 py-3.5 bg-[#020617]/50 border border-slate-700/50 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300 shadow-inner"
               placeholder="name@example.com"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5 ml-1">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-400 ml-1">
               Password
             </label>
             <input
@@ -138,7 +136,7 @@ export default function CustomSignIn() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-900/50 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-300"
+              className="w-full px-4 py-3.5 bg-[#020617]/50 border border-slate-700/50 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300 shadow-inner"
               placeholder="••••••••"
             />
           </div>
@@ -146,7 +144,7 @@ export default function CustomSignIn() {
           <button
             type="submit"
             disabled={isEmailLoading || isGoogleLoading}
-            className="w-full flex justify-center py-3 px-4 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex justify-center py-3.5 px-4 mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isEmailLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -155,6 +153,17 @@ export default function CustomSignIn() {
             )}
           </button>
         </form>
+
+        {/* --- REGISTER LINK ADDED HERE --- */}
+        <p className="mt-8 text-center text-sm text-slate-400">
+          Don&apos;t have an account?{' '}
+          <Link 
+            href="/sign-up" 
+            className="font-semibold text-cyan-400 hover:text-cyan-300 hover:underline transition-colors duration-200"
+          >
+            Sign up
+          </Link>
+        </p>
 
       </div>
     </div>
