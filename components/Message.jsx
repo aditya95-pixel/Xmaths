@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { assets } from '@/assets/assets'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
+// 1. Import remarkGfm
+import remarkGfm from 'remark-gfm' 
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import Prism from 'prismjs';
@@ -55,11 +57,18 @@ const Message = ({role,content}) => {
                                     <div className="prose prose-invert max-w-none leading-relaxed">
                                     <ReactMarkdown
                                         children={content}
-                                        remarkPlugins={[remarkMath]}
+                                        // 2. Add remarkGfm to the plugins array
+                                        remarkPlugins={[remarkMath, remarkGfm]} 
                                         rehypePlugins={[rehypeKatex]}
                                         components={{
                                             p: ({node, ...props}) => <p className="mb-4" {...props} />,
                                             li: ({node, ...props}) => <li className="mb-2" {...props} />,
+                                            
+                                            // Optional: Add table styling for Tailwind Typography (prose)
+                                            table: ({node, ...props}) => <table className="table-auto border-collapse border border-gray-400 w-full my-4" {...props} />,
+                                            th: ({node, ...props}) => <th className="border border-gray-500 px-4 py-2 bg-gray-800 text-left" {...props} />,
+                                            td: ({node, ...props}) => <td className="border border-gray-600 px-4 py-2" {...props} />,
+
                                             code({ node, inline, className, children, ...props }) {
                                                 const match = /language-(\w+)/.exec(className || '');
                                                 const codeValue = String(children).replace(/\n$/, '');

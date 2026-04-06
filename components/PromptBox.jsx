@@ -228,7 +228,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
         onPaste={handlePaste}
         className="w-full resize-none overflow-hidden break-words bg-transparent outline-none text-sm md:text-base min-h-[24px] md:min-h-[28px] leading-6 text-gray-900 placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/40"
         rows={1}
-        placeholder="Ask XMaths anything... solve a problem, explain a concept, or generate a quiz"
+        placeholder="Ask XMaths anything... solve a problem, explain a concept or get help with your homework!"
         required={!selectedImage}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
