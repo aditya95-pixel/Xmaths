@@ -1,18 +1,25 @@
 import { assets } from '@/assets/assets'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useClerk, UserButton } from '@clerk/nextjs'
 import { useAppContext } from '@/context/AppContext'
 import { ModeToggle } from '@/toggle'
 import ChatLabel from './ChatLabel'
 import Link from 'next/link'
+import { useTheme } from 'next-themes'
 
 const Sidebar = ({ expand, setExpand }) => {
     const { openSignIn } = useClerk();
     const { user, chats, isAdmin, createNewChat } = useAppContext();
+    const { resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
     
     // Tracks which chat has the action menu (rename/delete) open
     const [openMenu, setOpenMenu] = useState({ id: 0, open: false });
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    const isLight = mounted && resolvedTheme === 'light';
 
     // --- HELPER STYLES ---
     const getNavButtonStyle = (isExpand) => `
@@ -38,7 +45,7 @@ const Sidebar = ({ expand, setExpand }) => {
                 <div className={`flex ${expand ? 'flex-row gap-10 mb-5' : 'flex-col items-center gap-8 mb-5'}`}>
                     <Image 
                         className={`${expand ? 'w-36' : 'w-10'} dark:filter dark:hue-rotate-[340deg] dark:saturate-200`} 
-                        src={expand ? assets.logo_text : assets.logo_icon} 
+                        src={expand ? (isLight ? assets.logo_text_light : assets.logo_text) : assets.logo_icon} 
                         alt="Logo" 
                     />
                     <div 

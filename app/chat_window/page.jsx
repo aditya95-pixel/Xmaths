@@ -11,8 +11,10 @@ export default function ChatWindow() {
   const [expand, setExpand] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const { selectedChat } = useAppContext();
   const containerRef = useRef(null);
+  const showScrollToBottomRef = useRef(false);
 
   // Sync messages with the selected chat from context
   useEffect(() => {
@@ -30,6 +32,58 @@ export default function ChatWindow() {
       });
     }
   }, [messages]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        const threshold = 64;
+        const distanceFromBottom =
+          container.scrollHeight - (container.scrollTop + container.clientHeight);
+        const atBottom = distanceFromBottom <= threshold;
+        const nextShow = !atBottom;
+        if (showScrollToBottomRef.current !== nextShow) {
+          showScrollToBottomRef.current = nextShow;
+          setShowScrollToBottom(nextShow);
+        }
+      });
+    };
+
+    handleScroll();
+    container.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const threshold = 64;
+    const distanceFromBottom =
+      container.scrollHeight - (container.scrollTop + container.clientHeight);
+    const atBottom = distanceFromBottom <= threshold;
+    const nextShow = !atBottom;
+    if (showScrollToBottomRef.current !== nextShow) {
+      showScrollToBottomRef.current = nextShow;
+      setShowScrollToBottom(nextShow);
+    }
+  }, [messages.length]);
+
+  const scrollToBottom = () => {
+    if (!containerRef.current) return;
+    containerRef.current.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <div className="flex h-screen">
@@ -88,6 +142,17 @@ export default function ChatWindow() {
               </div>
             )}
           </div>
+        )}
+
+        {showScrollToBottom && messages.length > 0 && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            aria-label="Scroll to bottom"
+            className="absolute left-1/2 -translate-x-1/2 bottom-28 md:bottom-44 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-[#161a22] dark:text-white/80"
+          >
+            <span className="text-sm">↓</span>
+          </button>
         )}
 
         <PromptBox isLoading={isLoading} setIsLoading={setIsLoading} />

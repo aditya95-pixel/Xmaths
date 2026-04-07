@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, memo } from 'react'
 import Image from 'next/image'
 import { assets } from '@/assets/assets'
 import ReactMarkdown from 'react-markdown'
@@ -96,4 +96,4 @@ const Message = ({role,content}) => {
   )
 }
 
-export default Message
+export default memo(Message)

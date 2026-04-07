@@ -214,13 +214,22 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     <div className="p-4 md:p-5">
       {/* Domain chip */}
       {selectedDomain && (
-        <div className="mb-3 flex items-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs md:text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
-            <span className="h-2 w-2 rounded-full bg-red-500 dark:bg-red-400" />
-            {selectedDomain}
-          </span>
+      <div className="mb-3 flex items-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs md:text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+          <span className="h-2 w-2 rounded-full bg-red-500 dark:bg-red-400" />
+          <span>{selectedDomain}</span>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDomain(null)}
+            className="ml-1 flex h-4 w-4 items-center justify-center rounded-full text-red-500/80 transition hover:bg-red-200/60 hover:text-red-700 dark:text-red-300/80 dark:hover:bg-red-500/20 dark:hover:text-red-200"
+            aria-label="Clear selected domain"
+          >
+            <X size={12} strokeWidth={2.5} />
+          </button>
         </div>
-      )}
+      </div>
+    )}
 
       {/* Textarea */}
       <textarea

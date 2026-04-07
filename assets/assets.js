@@ -1,6 +1,7 @@
 import arrow_icon from "./arrow_icon.svg";
 import arrow_icon_dull from "./arrow_icon_dull.svg";
 import logo_text from "./logo_text.jpg";
+import logo_text_light from "./logo_text_light.png";
 import logo_icon from "./logo_icon.png";
 import menu_icon from "./menu_icon.svg";
 import search_icon from "./search_icon.svg";
@@ -27,6 +28,7 @@ export const assets = {
   arrow_icon,
   arrow_icon_dull,
   logo_text,
+  logo_text_light,
   logo_icon,
   menu_icon,
   search_icon,
