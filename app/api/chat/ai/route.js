@@ -23,7 +23,6 @@ export async function POST(req) {
     const prompt = formData.get("prompt");
     const image = formData.get("image"); // File object if uploaded
     const domain = formData.get("domain");
-    console.log(domain);
     await connectDB();
     const data = await Chat.findOne({ userId, _id: chatId });
 
@@ -79,6 +78,8 @@ Conversation History:
     const modelsToTry = [
       "gemini-3-flash-preview",
       "gemini-2.5-flash",
+      "gemma-4-31b-it",
+      "gemma-4-26b-it",
       "gemini-2.0-flash",
       "gemma-3-27b-it"
     ];
