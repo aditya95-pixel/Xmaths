@@ -1,25 +1,78 @@
 import { assets } from '@/assets/assets'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
-import { useClerk, UserButton } from '@clerk/nextjs'
+import React, { useEffect, useState, useRef } from 'react'
+import { useClerk, UserButton, useAuth } from '@clerk/nextjs'
 import { useAppContext } from '@/context/AppContext'
 import { ModeToggle } from '@/toggle'
 import ChatLabel from './ChatLabel'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
+import axios from 'axios'
+import toast from 'react-hot-toast'
 
 const Sidebar = ({ expand, setExpand }) => {
     const { openSignIn } = useClerk();
-    const { user, chats, isAdmin, createNewChat } = useAppContext();
+    const { getToken } = useAuth();
+    const { 
+        user, chats, setChats, createNewChat, 
+        selectedChat, setSelectedChat, fetchUsersChats 
+    } = useAppContext();
     const { resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     
-    // Tracks which chat has the action menu (rename/delete) open
+    // Tracks which chat has the action menu or is being edited
     const [openMenu, setOpenMenu] = useState({ id: 0, open: false });
+    const [editingChatId, setEditingChatId] = useState(null);
+
     useEffect(() => {
         setMounted(true);
     }, []);
+
     const isLight = mounted && resolvedTheme === 'light';
+
+    // --- 1. AUTO-RENAME LOGIC ---
+    useEffect(() => {
+        const autoRename = async () => {
+            if (selectedChat?.name === "New Chat" && selectedChat?.messages?.length > 0) {
+                const firstUserMsg = selectedChat.messages.find(m => m.role === "user");
+                if (firstUserMsg) {
+                    let generatedName = firstUserMsg.content.substring(0, 32);
+                    if (firstUserMsg.content.length > 32) generatedName += "...";
+                    
+                    try {
+                        const token = await getToken();
+                        await axios.post('/api/chat/rename', {
+                            chatId: selectedChat._id,
+                            name: generatedName
+                        }, { headers: { Authorization: `Bearer ${token}` } });
+                        
+                        setChats(prev => prev.map(c => c._id === selectedChat._id ? { ...c, name: generatedName } : c));
+                        setSelectedChat(prev => ({ ...prev, name: generatedName }));
+                    } catch (error) {
+                        console.error("Auto-rename failed", error);
+                    }
+                }
+            }
+        };
+        autoRename();
+    }, [selectedChat?.messages, selectedChat?._id, getToken, setChats, setSelectedChat]);
+
+    // --- 2. DELETE LOGIC ---
+    const handleDeleteChat = async (chatId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this chat?");
+        if (!confirmDelete) return;
+
+        try {
+            const token = await getToken();
+            await axios.post('/api/chat/delete', { chatId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Chat deleted");
+            fetchUsersChats(); 
+        } catch (error) {
+            toast.error("Failed to delete chat");
+        }
+    };
 
     // --- HELPER STYLES ---
     const getNavButtonStyle = (isExpand) => `
@@ -69,27 +122,6 @@ const Sidebar = ({ expand, setExpand }) => {
                     {expand && <div className="scale-90 dark:filter dark:hue-rotate-[340deg]"><ModeToggle /></div>}
                 </div>
 
-                {/* Navigation Links */}
-                <Link href="/learning_path" className={getNavButtonStyle(expand)}>
-                    <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
-                    {!expand && <div className={navTooltipStyle}>Explore</div>}
-                    {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Learn</p>}
-                </Link>
-
-                <Link href="/take_quiz" className={getNavButtonStyle(expand)}>
-                    <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
-                    {!expand && <div className={navTooltipStyle}>Quiz</div>}
-                    {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Take a Quiz</p>}
-                </Link>
-
-                {isAdmin && (
-                    <Link href="/contribute_resources" className={getNavButtonStyle(expand)}>
-                        <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
-                        {!expand && <div className={navTooltipStyle}>Contribute</div>}
-                        {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Contribute</p>}
-                    </Link>
-                )}
-
                 {/* New Chat Button */}
                 <button onClick={createNewChat} className={`${getNavButtonStyle(expand)} border-red-200 dark:border-red-600/50 bg-red-50 dark:bg-red-950/20 mt-4`}>
                     <Image className={`${expand ? 'w-6' : 'w-7'} dark:filter dark:hue-rotate-[340deg]`} src={expand ? assets.chat_icon : assets.chat_icon_dull} alt="" />
@@ -97,7 +129,7 @@ const Sidebar = ({ expand, setExpand }) => {
                     {expand && <p className='text-red-700 dark:text-red-50 font-bold flex-1 text-left'>New chat</p>}
                 </button>
 
-                {/* Recents Section with Rename/Delete capability via ChatLabel */}
+                {/* Recents Section */}
                 <div className={`mt-9 ${expand ? "block" : "hidden"} px-1`}>
                     <p className='text-red-600 dark:text-red-500 font-mono text-xs uppercase tracking-widest mb-3'>Recents</p>
                     <div className="space-y-1 max-h-[40vh] overflow-y-auto overflow-x-visible pr-4 custom-scrollbar">
@@ -106,8 +138,12 @@ const Sidebar = ({ expand, setExpand }) => {
                                 key={chat._id || index} 
                                 name={chat.name} 
                                 id={chat._id} 
+                                isSelected={selectedChat?._id === chat._id}
                                 openMenu={openMenu} 
-                                setOpenMenu={setOpenMenu} 
+                                setOpenMenu={setOpenMenu}
+                                editingChatId={editingChatId}
+                                setEditingChatId={setEditingChatId}
+                                onDelete={() => handleDeleteChat(chat._id)}
                             />
                         ))}
                     </div>

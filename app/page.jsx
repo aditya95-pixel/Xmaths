@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import Image from "next/image"; 
 import { useClerk, UserButton } from '@clerk/nextjs';
@@ -11,7 +11,12 @@ export default function Home() {
   const { openSignIn } = useClerk();
   const canvasRef = useRef(null);
   const router = useRouter();
-  const { user } = useAppContext();
+  
+  // Destructure createNewChat from context
+  const { user, createNewChat, isAdmin } = useAppContext();
+  
+  // Add a loading state to prevent spam-clicking the button
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -98,7 +103,7 @@ export default function Home() {
         }
       }
 
-      time += 0.006; // Slowed down the wave animation slightly
+      time += 0.006; 
       animId = requestAnimationFrame(draw);
     };
 
@@ -110,19 +115,17 @@ export default function Home() {
     };
   }, []);
 
-  // Container variant handles the delay between each child element
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.3, // 0.3 seconds delay between each element appearing
-        delayChildren: 0.2,   // Initial delay before the first element starts
+        staggerChildren: 0.3, 
+        delayChildren: 0.2,   
       }
     }
   };
 
-  // Item variant controls the actual slide up and fade in for individual pieces
   const itemVariants = {
     hidden: { opacity: 0, y: 50 },
     show: { 
@@ -132,9 +135,19 @@ export default function Home() {
     }
   };
 
+  // Logic to handle creating a new chat and navigating
+  const handleChatNowClick = async () => {
+    setIsCreatingChat(true);
+    // This creates a new chat in the DB and sets it as the active one in the Context
+    const success = await createNewChat(); 
+    if (success) {
+      router.push("/chat_window");
+    }
+    setIsCreatingChat(false);
+  };
+
   return (
     <main className="landing-root">
-      {/* - NavBar - */}
      <nav className="fixed top-0 right-0 left-0 flex justify-end items-center p-6 z-50">
       <div className="nav-auth">
         {user ? (
@@ -148,10 +161,8 @@ export default function Home() {
         )}
       </div>
     </nav>
-      {/* ── Hero ── */}
       <section className="hero-section">
         
-        {/* Parent container triggering the staggered children */}
         <motion.div 
           className="hero-content"
           variants={containerVariants}
@@ -159,37 +170,56 @@ export default function Home() {
           animate="show"
         >
           <h1 className="hero-heading">
-            {/* Element 1 */}
             <motion.span variants={itemVariants} style={{ display: 'inline-block' }}>
               <span className="hero-gradient-text">Xmaths</span>
             </motion.span>
             <br />
-            {/* Element 2 */}
             <motion.span variants={itemVariants} style={{ display: 'inline-block' }}>
               <span className="hero-white-text">AI Problem Solving Platform</span>
             </motion.span>
           </h1>
 
-          {/* Element 3 */}
           <motion.p variants={itemVariants} className="hero-description">
             A structured learning platform for mastering the mathematics behind data structures, algorithms,
             machine learning and AI — from algebra and calculus to probability,
             linear algebra, and beyond.
           </motion.p>
 
-          {/* Element 4 (Only if logged in) */}
           {user && (
             <motion.div variants={itemVariants} className="hero-actions">
               <button 
-                onClick={() => router.push("/chat_window")} className="btn-get-started">
-                Chat now!
+                onClick={handleChatNowClick} 
+                disabled={isCreatingChat}
+                className="btn-get-started flex items-center justify-center gap-2"
+              >
+                {isCreatingChat ? (
+                   <>
+                    <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+                    Starting Chat...
+                   </>
+                ) : (
+                  "Chat now!"
+                )}
               </button>
               <button 
                 onClick={() => router.push("/learning_path")} 
-                className="btn-ecosystems"
+                className="btn-get-started"
               >
                 Learn
               </button>
+              <button 
+                onClick={() => router.push("/take_quiz")} 
+                className="btn-get-started"
+              >
+                Take quiz
+              </button>
+              {isAdmin && <button 
+                onClick={() => router.push("/contribute_resources")} 
+                className="btn-ecosystems"
+              >
+                Contribute
+              </button>
+              }
             </motion.div>
           )}
         </motion.div>

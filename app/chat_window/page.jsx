@@ -85,16 +85,29 @@ export default function ChatWindow() {
     });
   };
 
+  // Close sidebar when clicking the main workspace area
+  const handleWorkspaceClick = () => {
+    if (expand) {
+      setExpand(false);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <Sidebar expand={expand} setExpand={setExpand} />
       
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8 dark:bg-black dark:text-white relative">
+      <div 
+        onClick={handleWorkspaceClick}
+        className="flex-1 flex flex-col items-center justify-center px-4 pb-8 dark:bg-black dark:text-white relative overflow-hidden"
+      >
         
         {/* Mobile Header */}
-        <div className="md:hidden absolute px-4 top-6 flex items-center justify-between w-full">
+        <div className="md:hidden absolute px-4 top-6 flex items-center justify-between w-full z-10">
           <Image
-            onClick={() => setExpand(!expand)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents the workspace click from immediately closing the sidebar we just opened
+              setExpand(!expand);
+            }}
             className={`cursor-pointer ${expand ? "" : "rotate-180"}`}
             src={assets.menu_icon}
             alt="Menu"
@@ -155,7 +168,10 @@ export default function ChatWindow() {
           </button>
         )}
 
-        <PromptBox isLoading={isLoading} setIsLoading={setIsLoading} />
+        {/* PromptBox wrapper to stop propagation and handle layout */}
+        <div onClick={(e) => e.stopPropagation()} className="w-full max-w-4xl flex justify-center">
+             <PromptBox isLoading={isLoading} setIsLoading={setIsLoading} />
+        </div>
         
         <p className="text-xs absolute bottom-1 dark:text-gray-500">
           Developed by Problem Solvers Inc.
