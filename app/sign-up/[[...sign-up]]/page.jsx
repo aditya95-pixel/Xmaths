@@ -31,7 +31,6 @@ export default function CustomSignUp() {
         redirectUrlComplete: '/',
       });
     } catch (err) {
-      console.error(err);
       setError('Failed to initialize Google sign up.');
       setIsGoogleLoading(false);
     }
@@ -58,7 +57,6 @@ export default function CustomSignUp() {
       // 3. Change the UI to show the OTP input form
       setPendingVerification(true);
     } catch (err) {
-      console.error("Error signing up:", err.errors);
       setError(err.errors[0]?.longMessage || 'An error occurred during sign up.');
     } finally {
       setIsLoading(false);
@@ -84,11 +82,9 @@ export default function CustomSignUp() {
         await setActive({ session: completeSignUp.createdSessionId });
         router.push('/');
       } else {
-        console.log("Verification incomplete:", completeSignUp);
         setError('Verification failed. Please try again.');
       }
     } catch (err) {
-      console.error("Error verifying:", err.errors);
       setError(err.errors[0]?.longMessage || 'Invalid verification code.');
     } finally {
       setIsLoading(false);

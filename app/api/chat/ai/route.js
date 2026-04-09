@@ -101,7 +101,6 @@ Conversation History:
         });
         break; 
       } catch (error) {
-        console.error(`Failed with ${modelName}:`, error.message);
         if (modelName === modelsToTry[modelsToTry.length - 1]) {
           throw new Error("All models failed to generate content.");
         }

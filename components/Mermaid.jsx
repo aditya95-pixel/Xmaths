@@ -29,7 +29,6 @@ const Mermaid = ({ chart }) => {
         }
       } catch (err) {
         // 2. If it fails, we catch it here instead of letting Mermaid "bomb" the UI
-        console.error("Mermaid parsing failed:", err);
         setError(true);
       }
     };
