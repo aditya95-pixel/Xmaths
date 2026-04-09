@@ -16,6 +16,7 @@ export const AppContextProvider = ({ children }) => {
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
 
+    // --- NEW: Admin Logic ---
     // Safely checks if the metadata role is set to 'admin'
     const isAdmin = user?.publicMetadata?.role === 'admin';
 
@@ -24,13 +25,9 @@ export const AppContextProvider = ({ children }) => {
             if (!user) return null;
             const token = await getToken();
             await axios.post('/api/chat/create', {}, { headers: { Authorization: `Bearer ${token}` } });
-            
-            // Added await so it finishes fetching before routing
-            await fetchUsersChats(); 
-            return true; // Return true to indicate successful creation
+            fetchUsersChats();
         } catch (error) {
             toast.error(error.message);
-            return false;
         }
     }
 
@@ -62,7 +59,7 @@ export const AppContextProvider = ({ children }) => {
 
     const value = {
         user,
-        isAdmin, 
+        isAdmin, // Expose this to the rest of the app
         chats,
         setChats,
         selectedChat,
