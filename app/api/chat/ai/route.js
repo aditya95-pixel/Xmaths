@@ -87,7 +87,6 @@ Conversation History:
     let completion = null;
     for (const modelName of modelsToTry) {
       try {
-        console.log(modelName);
         completion = await genAI.models.generateContent({
           model: modelName,
           contents: [
