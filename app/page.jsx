@@ -11,7 +11,7 @@ export default function Home() {
   const { openSignIn } = useClerk();
   const canvasRef = useRef(null);
   const router = useRouter();
-  const { user } = useAppContext();
+  const { user,createNewChat } = useAppContext();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -181,7 +181,7 @@ export default function Home() {
           {user && (
             <motion.div variants={itemVariants} className="hero-actions">
               <button 
-                onClick={() => router.push("/chat_window")} className="btn-get-started">
+                onClick={createNewChat} className="btn-get-started">
                 Chat now!
               </button>
               <button 
