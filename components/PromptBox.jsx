@@ -14,7 +14,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
   const dropdownRef = useRef(null);
   const [selectedDomain, setSelectedDomain] = useState(null);
 
-  const { user, chats, setChats, selectedChat, setSelectedChat } = useAppContext();
+  const { user, chats, setChats, selectedChat, setSelectedChat, fetchUsersChats } = useAppContext();
   const timeouts = useRef([]);
   const fileInputRef = useRef(null);
 
@@ -167,6 +167,9 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       });
 
       if (data.success) {
+        if(data.isFirstMessage){
+          fetchUsersChats();
+        }
         const assistantMessage = {
           role: 'system',
           content: data.data.content,
