@@ -3,6 +3,9 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation"; 
+
+
 
 export const AppContext = createContext();
 
@@ -15,7 +18,7 @@ export const AppContextProvider = ({ children }) => {
     const { getToken } = useAuth();
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
-
+    const router = useRouter();
     // --- NEW: Admin Logic ---
     // Safely checks if the metadata role is set to 'admin'
     const isAdmin = user?.publicMetadata?.role === 'admin';
@@ -25,6 +28,7 @@ export const AppContextProvider = ({ children }) => {
             if (!user) return null;
             const token = await getToken();
             await axios.post('/api/chat/create', {}, { headers: { Authorization: `Bearer ${token}` } });
+            router.push('/chat_window');
             fetchUsersChats();
         } catch (error) {
             toast.error(error.message);
