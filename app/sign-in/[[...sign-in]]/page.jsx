@@ -25,7 +25,6 @@ export default function CustomSignIn() {
         redirectUrlComplete: '/',
       });
     } catch (err) {
-      console.error(err);
       setError('Failed to initialize Google login.');
       setIsGoogleLoading(false);
     }
@@ -48,11 +47,9 @@ export default function CustomSignIn() {
         await setActive({ session: result.createdSessionId });
         router.push('/'); 
       } else {
-        console.log("Sign in incomplete:", result);
         setError('Further verification is required.');
       }
     } catch (err) {
-      console.error("Error signing in:", err.errors);
       setError(err.errors[0]?.longMessage || 'An error occurred during sign in.');
     } finally {
       setIsEmailLoading(false);

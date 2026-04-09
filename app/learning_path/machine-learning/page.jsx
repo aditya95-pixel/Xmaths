@@ -15,11 +15,9 @@ export default function MathematicsPage() {
         if (response.ok && Array.isArray(data)) {
           setResources(data);
         } else {
-          console.error("Invalid API response:", data);
           setResources([]);
         }
       } catch (error) {
-        console.error("Error fetching resources:", error);
         setResources([]);
       } finally {
         setLoading(false);
