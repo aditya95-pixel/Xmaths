@@ -3,10 +3,11 @@ import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { useClerk, UserButton } from '@clerk/nextjs'
 import { useAppContext } from '@/context/AppContext'
-import { ModeToggle } from '@/toggle'
+import ModeToggle from '@/toggle'
 import ChatLabel from './ChatLabel'
-import Link from 'next/link'
 import { useTheme } from 'next-themes'
+// Import the new relevant icons from Lucide
+import { BookOpen, FileQuestion, PlusCircle } from 'lucide-react'
 
 const Sidebar = ({ expand, setExpand }) => {
     const { openSignIn } = useClerk();
@@ -29,7 +30,7 @@ const Sidebar = ({ expand, setExpand }) => {
             "group relative h-10 w-10 mx-auto bg-neutral-100 dark:bg-transparent hover:bg-red-50 dark:hover:bg-red-950/30 border-neutral-200 dark:border-red-900/40 hover:border-red-700 rounded-lg"
         }`;
 
-    const navTooltipStyle = 'absolute w-max left-14 opacity-0 group-hover:opacity-100 transition bg-white dark:bg-[#0a0000] text-neutral-800 dark:text-red-100 text-xs font-mono tracking-tight px-3.5 py-2 rounded border border-neutral-200 dark:border-red-900/80 shadow-md pointer-events-none z-50';
+    const navTooltipStyle = 'absolute w-max left-14 opacity-0 group-hover:opacity-100 transition bg-white dark:bg-[#0a0000] text-neutral-800 dark:text-red-100 text-xs font-mono tracking-tight px-3.5 py-2 rounded border border-neutral-200 dark:border-red-900/80 shadow-md pointer-events-none';
 
     return (
         <div className={`
@@ -69,25 +70,25 @@ const Sidebar = ({ expand, setExpand }) => {
                     {expand && <div className="scale-90 dark:filter dark:hue-rotate-[340deg]"><ModeToggle /></div>}
                 </div>
 
-                {/* Navigation Links */}
-                <Link href="/learning_path" className={getNavButtonStyle(expand)}>
-                    <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
+                {/* Navigation Links using Lucide Icons */}
+                <a href="/learning_path" className={getNavButtonStyle(expand)}>
+                    <BookOpen strokeWidth={1.5} className={`${expand ? 'w-5 h-5' : 'w-6 h-6'} text-slate-800 dark:text-red-200`}  />
                     {!expand && <div className={navTooltipStyle}>Explore</div>}
                     {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Learn</p>}
-                </Link>
+                </a>
 
-                <Link href="/take_quiz" className={getNavButtonStyle(expand)}>
-                    <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
+                <a href="/take_quiz" className={getNavButtonStyle(expand)}>
+                    <FileQuestion strokeWidth={1.5} className={`${expand ? 'w-5 h-5' : 'w-6 h-6'} text-slate-800 dark:text-red-200`} />
                     {!expand && <div className={navTooltipStyle}>Quiz</div>}
                     {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Take a Quiz</p>}
-                </Link>
+                </a>
 
                 {isAdmin && (
-                    <Link href="/contribute_resources" className={getNavButtonStyle(expand)}>
-                        <Image className={`${expand ? 'w-5' : 'w-6'} dark:filter dark:hue-rotate-[340deg]`} src={assets.menu_icon} alt="" />
+                    <a href="/contribute_resources" className={getNavButtonStyle(expand)}>
+                        <PlusCircle strokeWidth={1.5} className={`${expand ? 'w-5 h-5' : 'w-6 h-6'} text-slate-800 dark:text-red-200`} />
                         {!expand && <div className={navTooltipStyle}>Contribute</div>}
                         {expand && <p className='text-neutral-800 dark:text-red-100 font-semibold text-sm flex-1'>Contribute</p>}
-                    </Link>
+                    </a>
                 )}
 
                 {/* New Chat Button */}

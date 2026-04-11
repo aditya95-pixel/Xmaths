@@ -248,7 +248,6 @@ pre{
 }
 
 /* The Heading Text */
-/* The Heading Text */
 .hero-gradient-text {
   /* Using a vibrant red to a pure electric blue */
   background: linear-gradient(135deg, rgb(255, 11, 11) 0%, rgb(1, 1, 163) 100%);
@@ -276,9 +275,6 @@ pre{
   align-items: center;
 }
 
-
-
-/* The Primary Button */
 /* The Primary Button */
 .btn-get-started {
   padding: 14px 32px;
@@ -300,7 +296,6 @@ pre{
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5);
 }
-
 
 .btn-ecosystems {
   padding: 14px 32px;
@@ -347,4 +342,31 @@ pre{
   .hero-description br {
     display: none;
   }
+}
+
+/* ─── View Transitions API for Theme Toggle ─── */
+
+/* Disable the default cross-fade for the root view transition */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Ensure the old view stays underneath */
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+/* The new view (whether light or dark) ALWAYS sits on top and expands */
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* Guarantee Next-Themes .dark class doesn't override the z-index */
+.dark::view-transition-old(root) {
+  z-index: 1;
+}
+.dark::view-transition-new(root) {
+  z-index: 2;
 }

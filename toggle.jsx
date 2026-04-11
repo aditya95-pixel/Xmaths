@@ -1,40 +1,83 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTheme } from "next-themes"
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
+import { motion } from "framer-motion";
 
-export function ModeToggle({ compact = false }) {
-  const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+export default function ModeToggle() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null
+  const handleToggle = async (e) => {
+    const isDark = resolvedTheme === "dark";
+    const nextTheme = isDark ? "light" : "dark";
 
-  const isDark = resolvedTheme === "dark"
-  const nextLabel = isDark ? "Light" : "Dark"
+    if (!document.startViewTransition) {
+      setTheme(nextTheme);
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => {
+      // Synchronously force the dark class so the browser captures 
+      // a pure black or pure white snapshot instantly!
+      const root = document.documentElement;
+      if (nextTheme === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+      setTheme(nextTheme);
+    });
+
+    transition.ready.then(() => {
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`,
+      ];
+
+      document.documentElement.animate(
+        { clipPath },
+        {
+          duration: 800, // Smooth, 0.8s expansion
+          easing: "cubic-bezier(0.85, 0, 0.15, 1)", // Premium Apple-like curve
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    });
+  };
+
+  if (!mounted) return null;
 
   return (
     <button
-      type="button"
-      role="switch"
-      aria-checked={isDark}
-      aria-label={`Switch to ${nextLabel.toLowerCase()}`}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`inline-flex items-center gap-2 rounded-full h-9 px-2 py-1 transition-colors dark:text-white text-sm`}
+      onClick={handleToggle}
+      className="relative p-2.5 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all focus:outline-none shadow-sm hover:shadow-md"
+      aria-label="Toggle theme"
     >
-      <span
-        className={`relative inline-flex h-5 w-9 items-center rounded-full border transition-colors
-        ${isDark ? "bg-black border-white/30" : "bg-white border-black/20"}`}
+      <motion.div
+        initial={false}
+        animate={{ 
+            rotate: resolvedTheme === "dark" ? -180 : 0,
+            scale: [1, 1.4, 1] // Spring pop effect
+        }}
+        transition={{ duration: 0.6, type: "spring", stiffness: 150, damping: 10 }}
       >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full transition-transform
-          ${isDark ? "translate-x-4 bg-white" : "translate-x-1 bg-black"}`}
-        />
-      </span>
-      {!compact && <span className="select-none">{nextLabel}</span>}
+        {resolvedTheme === "dark" ? (
+          <Sun className="w-5 h-5 text-yellow-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-slate-800" />
+        )}
+      </motion.div>
     </button>
-  )
+  );
 }
