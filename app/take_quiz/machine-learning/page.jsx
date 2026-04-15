@@ -111,6 +111,18 @@ function MCQPage() {
   const [quizState, setQuizState] = useState('idle'); // 'idle' | 'active' | 'completed'
   const [history, setHistory] = useState([]);
 
+  const getDifficultyClasses = (difficulty) => {
+    switch (difficulty) {
+      case 'Easy':
+        return 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10';
+      case 'Hard':
+        return 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10';
+      case 'Medium':
+      default:
+        return 'text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10';
+    }
+  };
+
   const renderMath = (text) => {
     if (!text) return "";
     const parts = text.split('$');
@@ -312,8 +324,11 @@ function MCQPage() {
                       key={q._id}
                       className="bg-white dark:bg-zinc-900/50 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm"
                     >
-                      <div className="flex justify-between items-start mb-6">
+                      <div className="flex justify-between items-start gap-3 mb-6">
                         <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-lg">{q.topic}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${getDifficultyClasses(q.difficulty)}`}>
+                          {q.difficulty || 'Medium'}
+                        </span>
                       </div>
 
                       <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-6 leading-relaxed">

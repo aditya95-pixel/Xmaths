@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Mic, X, MoreVertical, Check, Paperclip, Printer } from 'lucide-react';
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
+  const MAX_TEXTAREA_ROWS = 8;
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -17,6 +18,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
   const { user, chats, setChats, selectedChat, setSelectedChat, fetchUsersChats } = useAppContext();
   const timeouts = useRef([]);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const SpeechRecognition =
     typeof window !== 'undefined' &&
@@ -37,6 +39,21 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     timeouts.current = [];
   };
 
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = 'auto';
+
+    const computedStyle = window.getComputedStyle(textarea);
+    const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
+    const maxHeight = lineHeight * MAX_TEXTAREA_ROWS;
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -53,6 +70,10 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [prompt]);
 
   const handleVoiceInput = () => {
     const recognition = recognitionRef.current;
@@ -131,14 +152,18 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     if (!user) return toast.error('User not authenticated');
     if (isLoading) return toast.error('Wait for previous prompt response');
 
+    const imageToSend = selectedImage;
+
     setIsLoading(true);
     setPrompt('');
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     clearTypingTimeouts();
 
     const userPrompt = {
       role: 'user',
       content: trimmedPrompt,
-      image: selectedImage ? URL.createObjectURL(selectedImage) : null,
+      image: imageToSend ? URL.createObjectURL(imageToSend) : null,
       timestamp: Date.now()
     };
 
@@ -159,7 +184,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       const formData = new FormData();
       formData.append('chatId', selectedChat._id);
       formData.append('prompt', trimmedPrompt);
-      if (selectedImage) formData.append('image', selectedImage);
+      if (imageToSend) formData.append('image', imageToSend);
       if (selectedDomain) formData.append('domain', selectedDomain);
 
       const { data } = await axios.post('/api/chat/ai', formData, {
@@ -191,12 +216,14 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       } else {
         toast.error(data.message);
         setPrompt(trimmedPrompt);
+        setSelectedImage(imageToSend);
       }
     } catch (error) {
       toast.error(error.message);
+      setPrompt(trimmedPrompt);
+      setSelectedImage(imageToSend);
     } finally {
       setIsLoading(false);
-      setSelectedImage(null);
     }
   };
   const handlePrint = () => {
@@ -239,9 +266,10 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
 
       {/* Textarea */}
       <textarea
+        ref={textareaRef}
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
-        className="w-full resize-none overflow-hidden break-words bg-transparent outline-none text-sm md:text-base min-h-[24px] md:min-h-[28px] leading-6 text-gray-900 placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/40"
+        className="w-full resize-none break-words bg-transparent outline-none text-sm md:text-base min-h-[24px] md:min-h-[28px] max-h-48 leading-6 text-gray-900 placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/40"
         rows={1}
         placeholder="Ask XMaths anything... solve a problem, explain a concept or get help with your homework!"
         required={!selectedImage}
