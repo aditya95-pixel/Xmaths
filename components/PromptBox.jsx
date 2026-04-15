@@ -4,7 +4,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Mic, X, MoreVertical, Check, Paperclip } from 'lucide-react';
+import { Mic, X, MoreVertical, Check, Paperclip, Printer } from 'lucide-react';
 
 const PromptBox = ({ isLoading, setIsLoading }) => {
   const [prompt, setPrompt] = useState('');
@@ -199,6 +199,9 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       setSelectedImage(null);
     }
   };
+  const handlePrint = () => {
+    window.print();
+  };
 
   const hasContent = prompt.trim() || selectedImage;
 
@@ -269,6 +272,16 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
       {/* Bottom toolbar */}
       <div className="mt-4 flex items-center justify-between gap-3 relative">
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="h-10 w-10 rounded-full border flex items-center justify-center transition
+              border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900
+              dark:border-white/10 dark:bg-[#1a1d24] dark:text-white/80 dark:hover:bg-[#222630] dark:hover:text-white"
+            aria-label="Print Full Chat"
+          >
+            <Printer size={18} />
+          </button>
           {/* Image Upload */}
           <button
             type="button"

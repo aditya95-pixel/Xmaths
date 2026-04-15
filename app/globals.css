@@ -370,3 +370,60 @@ pre{
 .dark::view-transition-new(root) {
   z-index: 2;
 }
+
+@media print {
+  /* 1. Kill the screen-lock on the main wrapper */
+  html, body, .flex.h-screen {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* 2. Hide Sidebar, PromptBox, Scroll button, and Mobile Header */
+  aside, 
+  nav, 
+  form, 
+  button,
+  .md\:hidden.absolute.px-4.top-6, /* Mobile header */
+  .absolute.bottom-1, /* Footer text */
+  [aria-label="Scroll to bottom"] {
+    display: none !important;
+  }
+
+  /* 3. Expand the main content area */
+  .flex-1 {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* 4. Ensure the message container is not restricted */
+  /* This targets the containerRef div */
+  .overflow-y-auto {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    position: relative !important;
+    display: block !important;
+  }
+
+  /* 5. Clean up the chat name (New Chat) text */
+  .fixed.top-8 {
+    position: static !important;
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+    border: none !important;
+  }
+
+  /* 6. Fix Colors for printing */
+  .dark\:bg-black {
+    background-color: white !important;
+  }
+  
+  .dark\:text-white {
+    color: black !important;
+  }
+}
