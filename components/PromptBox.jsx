@@ -235,7 +235,7 @@ const PromptBox = ({ isLoading, setIsLoading, onPrintChat }) => {
   return (
   <form
     onSubmit={sendPrompt}
-    className={`w-full ${
+    className={`mx-auto w-full ${
       selectedChat?.messages.length > 0 ? 'max-w-4xl' : 'max-w-3xl'
     } relative overflow-visible rounded-[28px] border transition-all duration-300
       bg-white border-gray-200 shadow-[0_12px_40px_rgba(0,0,0,0.12)]
