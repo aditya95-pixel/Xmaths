@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Mic, X, MoreVertical, Check, Paperclip, Printer } from 'lucide-react';
 
-const PromptBox = ({ isLoading, setIsLoading }) => {
+const PromptBox = ({ isLoading, setIsLoading, onPrintChat }) => {
   const MAX_TEXTAREA_ROWS = 8;
   const [prompt, setPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -227,7 +227,7 @@ const PromptBox = ({ isLoading, setIsLoading }) => {
     }
   };
   const handlePrint = () => {
-    window.print();
+    onPrintChat?.();
   };
 
   const hasContent = prompt.trim() || selectedImage;

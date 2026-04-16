@@ -85,6 +85,13 @@ export default function ChatWindow() {
     });
   };
 
+  const handlePrintChat = () => {
+    setExpand(false);
+    window.setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
   return (
     <div className="flex h-screen">
       <Sidebar expand={expand} setExpand={setExpand} />
@@ -144,18 +151,24 @@ export default function ChatWindow() {
           </div>
         )}
 
-        {showScrollToBottom && messages.length > 0 && (
-          <button
-            type="button"
-            onClick={scrollToBottom}
-            aria-label="Scroll to bottom"
-            className="absolute left-1/2 -translate-x-1/2 bottom-28 md:bottom-44 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-[#161a22] dark:text-white/80"
-          >
+        <div className="relative w-full max-w-4xl">
+          {showScrollToBottom && messages.length > 0 && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              aria-label="Scroll to bottom"
+              className="absolute left-1/2 bottom-full z-20 mb-4 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-[#161a22] dark:text-white/80"
+            >
             <span className="text-sm">↓</span>
-          </button>
-        )}
+            </button>
+          )}
 
-        <PromptBox isLoading={isLoading} setIsLoading={setIsLoading} />
+          <PromptBox
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            onPrintChat={handlePrintChat}
+          />
+        </div>
         
         <p className="text-xs absolute bottom-1 dark:text-gray-500">
           Developed by Problem Solvers Inc.

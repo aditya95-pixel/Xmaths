@@ -34,7 +34,7 @@ const Sidebar = ({ expand, setExpand }) => {
 
     return (
         <div className={`
-            flex flex-col h-screen sticky top-0
+            flex flex-col h-screen sticky top-0 print:hidden
             bg-white dark:bg-[#050505] pt-7 transition-all
             z-50 max-md:absolute max-md:h-screen 
             ${expand ? 'p-4 w-64' : 'md:w-20 w-0 max-md:overflow-hidden'}
