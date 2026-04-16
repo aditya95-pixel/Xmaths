@@ -6,13 +6,12 @@ import React from 'react'
 import toast from 'react-hot-toast'
 
 const ChatLabel = ({ openMenu, setOpenMenu, id, name }) => {
-    const { fetchUsersChats, chats, setSelectedChat, selectedChat } = useAppContext();
+    const { fetchUsersChats, selectChatById, selectedChat } = useAppContext();
 
     const isSelected = selectedChat?._id === id;
 
     const selectChat = () => {
-        const chatData = chats.find(chat => chat._id === id);
-        setSelectedChat(chatData);
+        selectChatById(id);
     }
 
     const renameHandler = async (e) => {

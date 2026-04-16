@@ -23,29 +23,104 @@ export const AppContextProvider = ({ children }) => {
     // Safely checks if the metadata role is set to 'admin'
     const isAdmin = user?.publicMetadata?.role === 'admin';
 
+    const isChatEmpty = (chat) => !chat?.messages || chat.messages.length === 0;
+
+    const deleteChatById = async (chatId, token) => {
+        if (!chatId) return;
+        await axios.post(
+            '/api/chat/delete',
+            { chatId },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+    };
+
+    const cleanupEmptyChats = async (chatList, token, preserveChatId = null) => {
+        const nonEmptyChats = chatList.filter((chat) => !isChatEmpty(chat));
+        const emptyChats = chatList.filter(
+            (chat) => isChatEmpty(chat) && chat._id !== preserveChatId
+        );
+
+        // Keep the preserved draft when provided; otherwise keep a single
+        // draft only when it is the user's only chat.
+        const chatsToDelete =
+            nonEmptyChats.length > 0 ? emptyChats : emptyChats.slice(1);
+
+        if (chatsToDelete.length === 0) {
+            return chatList;
+        }
+
+        await Promise.all(
+            chatsToDelete.map((chat) => deleteChatById(chat._id, token))
+        );
+
+        return chatList.filter(
+            (chat) => !chatsToDelete.some((draft) => draft._id === chat._id)
+        );
+    };
+
+    const selectChatById = async (chatId) => {
+        const nextChat = chats.find((chat) => chat._id === chatId);
+        if (!nextChat) return;
+
+        if (selectedChat?._id !== chatId && isChatEmpty(selectedChat)) {
+            try {
+                const token = await getToken();
+                await deleteChatById(selectedChat._id, token);
+                setChats((prevChats) => prevChats.filter((chat) => chat._id !== selectedChat._id));
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+
+        setSelectedChat(nextChat);
+    };
+
     const createNewChat = async () => {
         try {
             if (!user) return null;
+            if (isChatEmpty(selectedChat)) {
+                router.push('/chat_window');
+                return selectedChat;
+            }
+
             const token = await getToken();
-            await axios.post('/api/chat/create', {}, { headers: { Authorization: `Bearer ${token}` } });
+            await cleanupEmptyChats(chats, token);
+            const { data } = await axios.post(
+                '/api/chat/create',
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (!data.success || !data.data) {
+                throw new Error(data.message || 'Failed to create chat');
+            }
+
+            const newChat = data.data;
+            setChats((prevChats) => [newChat, ...prevChats.filter((chat) => chat._id !== newChat._id)]);
+            setSelectedChat(newChat);
             router.push('/chat_window');
-            fetchUsersChats();
+            await fetchUsersChats(newChat._id);
+            return newChat;
         } catch (error) {
             toast.error(error.message);
         }
     }
 
-    const fetchUsersChats = async () => {
+    const fetchUsersChats = async (preserveChatId = null) => {
         try {
             const token = await getToken();
             const { data } = await axios.get('/api/chat/get', { headers: { Authorization: `Bearer ${token}` } });
             if (data.success) {
-                if (data.data.length === 0) {
+                const cleanedChats = await cleanupEmptyChats(data.data, token, preserveChatId);
+
+                if (cleanedChats.length === 0) {
                     await createNewChat();
                 } else {
-                    const sortedChats = data.data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                    const sortedChats = cleanedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
                     setChats(sortedChats);
-                    setSelectedChat(sortedChats[0]);
+                    const nextSelectedChat =
+                        sortedChats.find((chat) => chat._id === preserveChatId) || sortedChats[0];
+                    setSelectedChat(nextSelectedChat);
                 }
             } else {
                 toast.error(data.message);
@@ -68,6 +143,7 @@ export const AppContextProvider = ({ children }) => {
         setChats,
         selectedChat,
         setSelectedChat,
+        selectChatById,
         fetchUsersChats,
         createNewChat
     }

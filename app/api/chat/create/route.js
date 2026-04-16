@@ -15,8 +15,8 @@ export async function POST(req) {
             name:"New Chat",
         };
         await connectDB();
-        await Chat.create(chatData);
-        return NextResponse.json({success:true,message:"Chat created"});
+        const chat = await Chat.create(chatData);
+        return NextResponse.json({success:true,message:"Chat created", data: chat});
     } catch (error) {
         return NextResponse.json({success:false,error:error.message});
     }
