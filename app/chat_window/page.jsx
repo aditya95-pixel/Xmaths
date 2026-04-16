@@ -96,7 +96,11 @@ export default function ChatWindow() {
     <div className="flex h-screen">
       <Sidebar expand={expand} setExpand={setExpand} />
       
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8 dark:bg-black dark:text-white relative">
+      <div
+        className={`flex-1 min-h-0 flex flex-col items-center px-4 pb-8 dark:bg-black dark:text-white relative ${
+          messages.length === 0 ? "justify-center" : "justify-start"
+        }`}
+      >
         
         {/* Mobile Header */}
         <div className="md:hidden absolute px-4 top-6 flex items-center justify-between w-full">
@@ -122,9 +126,9 @@ export default function ChatWindow() {
             <p className="text-sm mt-2">Which problems can I solve today?</p>
           </div>
         ) : (
-          <div 
-            ref={containerRef} 
-            className="relative flex flex-col items-center justify-start w-full mt-20 max-h-screen overflow-y-auto print:h-auto print:max-h-none print:overflow-visible"
+          <div
+            ref={containerRef}
+            className="relative flex flex-1 min-h-0 flex-col items-center justify-start w-full mt-20 overflow-y-auto pb-28 md:pb-32 print:h-auto print:max-h-none print:overflow-visible print:pb-0"
           >
             <p className="fixed top-8 border border-transparent hover:border-gray-500/50 py-1 px-2 rounded-lg font-semibold mb-6 print:static print:mb-10">
               {selectedChat?.name || "New Chat"}
@@ -151,7 +155,13 @@ export default function ChatWindow() {
           </div>
         )}
 
-        <div className="relative w-full max-w-4xl">
+        <div
+          className={`w-full max-w-4xl ${
+            messages.length > 0
+              ? "absolute bottom-6 left-1/2 z-30 -translate-x-1/2 px-4"
+              : "relative"
+          }`}
+        >
           {showScrollToBottom && messages.length > 0 && (
             <button
               type="button"
@@ -159,7 +169,7 @@ export default function ChatWindow() {
               aria-label="Scroll to bottom"
               className="absolute left-1/2 bottom-full z-20 mb-4 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl dark:border-white/10 dark:bg-[#161a22] dark:text-white/80"
             >
-            <span className="text-sm">↓</span>
+              <span className="text-sm">&darr;</span>
             </button>
           )}
 
