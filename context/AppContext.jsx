@@ -24,6 +24,8 @@ export const AppContextProvider = ({ children }) => {
     const isAdmin = user?.publicMetadata?.role === 'admin';
 
     const isChatEmpty = (chat) => !chat?.messages || chat.messages.length === 0;
+    const sortChatsByUpdatedAt = (chatList) =>
+        [...chatList].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
     const deleteChatById = async (chatId, token) => {
         if (!chatId) return;
@@ -78,13 +80,44 @@ export const AppContextProvider = ({ children }) => {
     const createNewChat = async () => {
         try {
             if (!user) return null;
+            router.push('/chat_window');
+            const token = await getToken();
+
             if (isChatEmpty(selectedChat)) {
-                router.push('/chat_window');
                 return selectedChat;
             }
 
-            const token = await getToken();
-            await cleanupEmptyChats(chats, token);
+            const reusableDraft = chats.find((chat) => isChatEmpty(chat));
+            if (reusableDraft) {
+                const sortedChats = sortChatsByUpdatedAt(
+                    chats.filter((chat) => chat._id !== reusableDraft._id)
+                );
+                setChats([reusableDraft, ...sortedChats]);
+                setSelectedChat(reusableDraft);
+                return reusableDraft;
+            }
+
+            const { data: existingChatsResponse } = await axios.get('/api/chat/get', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!existingChatsResponse.success) {
+                throw new Error(existingChatsResponse.message || 'Failed to load chats');
+            }
+
+            const cleanedChats = await cleanupEmptyChats(existingChatsResponse.data, token);
+            const syncedDraft = cleanedChats.find((chat) => isChatEmpty(chat));
+            const sortedChats = sortChatsByUpdatedAt(cleanedChats);
+
+            if (sortedChats.length > 0) {
+                setChats(sortedChats);
+            }
+
+            if (syncedDraft) {
+                setSelectedChat(syncedDraft);
+                return syncedDraft;
+            }
+
             const { data } = await axios.post(
                 '/api/chat/create',
                 {},
@@ -98,7 +131,6 @@ export const AppContextProvider = ({ children }) => {
             const newChat = data.data;
             setChats((prevChats) => [newChat, ...prevChats.filter((chat) => chat._id !== newChat._id)]);
             setSelectedChat(newChat);
-            router.push('/chat_window');
             await fetchUsersChats(newChat._id);
             return newChat;
         } catch (error) {
@@ -116,7 +148,7 @@ export const AppContextProvider = ({ children }) => {
                 if (cleanedChats.length === 0) {
                     await createNewChat();
                 } else {
-                    const sortedChats = cleanedChats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                    const sortedChats = sortChatsByUpdatedAt(cleanedChats);
                     setChats(sortedChats);
                     const nextSelectedChat =
                         sortedChats.find((chat) => chat._id === preserveChatId) || sortedChats[0];
