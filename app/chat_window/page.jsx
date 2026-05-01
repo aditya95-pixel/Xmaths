@@ -20,6 +20,8 @@ export default function ChatWindow() {
   useEffect(() => {
     if (selectedChat) {
       setMessages(selectedChat.messages);
+    } else {
+      setMessages([]);
     }
   }, [selectedChat]);
 

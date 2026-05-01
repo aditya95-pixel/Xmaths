@@ -80,22 +80,7 @@ export const AppContextProvider = ({ children }) => {
     const createNewChat = async () => {
         try {
             if (!user) return null;
-            router.push('/chat_window');
             const token = await getToken();
-
-            if (isChatEmpty(selectedChat)) {
-                return selectedChat;
-            }
-
-            const reusableDraft = chats.find((chat) => isChatEmpty(chat));
-            if (reusableDraft) {
-                const sortedChats = sortChatsByUpdatedAt(
-                    chats.filter((chat) => chat._id !== reusableDraft._id)
-                );
-                setChats([reusableDraft, ...sortedChats]);
-                setSelectedChat(reusableDraft);
-                return reusableDraft;
-            }
 
             const { data: existingChatsResponse } = await axios.get('/api/chat/get', {
                 headers: { Authorization: `Bearer ${token}` }
@@ -105,18 +90,20 @@ export const AppContextProvider = ({ children }) => {
                 throw new Error(existingChatsResponse.message || 'Failed to load chats');
             }
 
-            const cleanedChats = await cleanupEmptyChats(existingChatsResponse.data, token);
-            const syncedDraft = cleanedChats.find((chat) => isChatEmpty(chat));
+            const nonEmptyChats = existingChatsResponse.data.filter((chat) => !isChatEmpty(chat));
+            const emptyChats = existingChatsResponse.data.filter((chat) => isChatEmpty(chat));
+
+            if (emptyChats.length > 0) {
+                await Promise.all(
+                    emptyChats.map((chat) => deleteChatById(chat._id, token))
+                );
+            }
+
+            const cleanedChats = nonEmptyChats;
             const sortedChats = sortChatsByUpdatedAt(cleanedChats);
 
-            if (sortedChats.length > 0) {
-                setChats(sortedChats);
-            }
-
-            if (syncedDraft) {
-                setSelectedChat(syncedDraft);
-                return syncedDraft;
-            }
+            setChats(sortedChats);
+            setSelectedChat(null);
 
             const { data } = await axios.post(
                 '/api/chat/create',
@@ -131,7 +118,7 @@ export const AppContextProvider = ({ children }) => {
             const newChat = data.data;
             setChats((prevChats) => [newChat, ...prevChats.filter((chat) => chat._id !== newChat._id)]);
             setSelectedChat(newChat);
-            await fetchUsersChats(newChat._id);
+            router.push('/chat_window');
             return newChat;
         } catch (error) {
             toast.error(error.message);
