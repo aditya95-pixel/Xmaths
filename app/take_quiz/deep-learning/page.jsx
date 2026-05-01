@@ -15,6 +15,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import ReactMarkdown from 'react-markdown';
 
 // Register Chart.js components
 ChartJS.register(
@@ -110,6 +111,7 @@ function MCQPage() {
   const [visibleAnswers, setVisibleAnswers] = useState({});
   const [quizState, setQuizState] = useState('idle'); // 'idle' | 'active' | 'completed'
   const [history, setHistory] = useState([]);
+  const [aiExplanation, setAiExplanation] = useState("");
 
   const getDifficultyClasses = (difficulty) => {
     switch (difficulty) {
@@ -167,6 +169,7 @@ function MCQPage() {
   const startQuiz = () => {
     setUserSelections({});
     setVisibleAnswers({});
+    setAiExplanation("");
     setQuizState('active');
   };
 
@@ -185,34 +188,40 @@ function MCQPage() {
     const finalScore = calculateScore();
     const total = mcqs.length;
 
+    // 1. Identify mistakes
+    const mistakes = mcqs
+      .filter((q) => {
+        const selectedIdx = userSelections[q._id];
+        return selectedIdx === undefined || q.options[selectedIdx] !== q.answer;
+      })
+      .map((q) => ({
+        question: q.question,
+        correctAnswer: q.answer,
+        userAnswer: userSelections[q._id] !== undefined ? q.options[userSelections[q._id]] : "No answer"
+      }));
+
     try {
-      // 1. Send the data FIRST
       const response = await fetch('/api/results', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json' 
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           score: finalScore,
           totalQuestions: total,
-          subject: "Deep Learning"
+          subject: "Deep Learning",
+          userMistakes: mistakes // Pass the collected mistakes
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
+      if (!response.ok) throw new Error("Failed to save");
 
-      // 2. Refresh history so the new result is available
-      await fetchHistory();
+      const data = await response.json();
+      setAiExplanation(data.explanation); // Store the AI feedback
       
-      // 3. ONLY THEN move to completion screen
+      await fetchHistory();
       setQuizState('completed');
     } catch (error) {
       console.error("Critical: Failed to save result:", error);
-      // Optional: Show a toast or alert here
-      setQuizState('completed'); // Still move forward so user isn't stuck
+      setQuizState('completed');
     }
   };
 
@@ -421,6 +430,15 @@ function MCQPage() {
                 Accuracy: {Math.round((calculateScore() / mcqs.length) * 100)}%
               </p>
             </div>
+
+            {aiExplanation && (
+              <div className="mt-8 text-left p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800">
+                <h4 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">Tutor's Feedback</h4>
+                <div className="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
+                  <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                </div>
+              </div>
+            )}
 
             <button 
               onClick={() => setQuizState('idle')}

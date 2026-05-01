@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
+import { GoogleGenAI } from "@google/genai";
 import connectDB from "@/config/db";
 import QuizResult from "@/models/QuizResult";
+
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function GET(req) {
   try {
@@ -34,8 +37,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    await connectDB(); // Use the same connection helper as GET
-    
+    await connectDB();
     const { userId } = getAuth(req);
     
     if (!userId) {
@@ -43,26 +45,53 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { score, totalQuestions, subject } = body;
+    const { score, totalQuestions, subject, userMistakes } = body; 
 
     // Server-side validation
     if (typeof score !== 'number' || !totalQuestions) {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
 
+    const explanationPrompt = `
+      You are an expert tutor. 
+      
+      TASK:
+      ${userMistakes.length === 0 
+        ? "The user answered all questions correctly! Provide a short, enthusiastic, and encouraging congratulatory message praising their mastery of the subject." 
+        : `The user made the following mistakes: ${JSON.stringify(userMistakes)}. 
+          Explain these mistakes in a clear, encouraging way. Provide concise, actionable feedback for each concept they got wrong.`
+      }
+    `;
+
+    const completion = await genAI.models.generateContent({
+      model: "gemma-3-27b-it",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: explanationPrompt}],
+        },
+      ],
+    });
+    const explanation = completion.text;
+
     const accuracy = (score / totalQuestions) * 100;
 
     const newResult = await QuizResult.create({
-      userId: userId, // Use userId from getAuth
+      userId: userId,
       subject: subject || "Data Structures",
       score,
       totalQuestions,
       accuracy,
     });
 
-    return NextResponse.json(newResult, { status: 201 });
+    // Send both the saved result and the AI-generated explanation to the frontend
+    return NextResponse.json({ 
+      result: newResult, 
+      explanation: explanation 
+    }, { status: 201 });
+
   } catch (error) {
     console.error("API POST Error:", error);
-    return NextResponse.json({ error: "Failed to save result" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
   }
 }
