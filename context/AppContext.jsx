@@ -18,6 +18,7 @@ export const AppContextProvider = ({ children }) => {
     const { getToken } = useAuth();
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
+    const [isCreatingChat, setIsCreatingChat] = useState(false);
     const router = useRouter();
     // --- NEW: Admin Logic ---
     // Safely checks if the metadata role is set to 'admin'
@@ -80,8 +81,27 @@ export const AppContextProvider = ({ children }) => {
     const createNewChat = async () => {
         try {
             if (!user) return null;
-            const token = await getToken();
+            router.push('/chat_window');
 
+            const tempChatId = `temp-${Date.now()}`;
+            const optimisticChat = {
+                _id: tempChatId,
+                name: "New Chat",
+                messages: [],
+                userId: user.id,
+                pending: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+
+            setIsCreatingChat(true);
+            setChats((prevChats) => [
+                optimisticChat,
+                ...sortChatsByUpdatedAt(prevChats.filter((chat) => !isChatEmpty(chat)))
+            ]);
+            setSelectedChat(optimisticChat);
+
+            const token = await getToken();
             const { data: existingChatsResponse } = await axios.get('/api/chat/get', {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -90,7 +110,6 @@ export const AppContextProvider = ({ children }) => {
                 throw new Error(existingChatsResponse.message || 'Failed to load chats');
             }
 
-            const nonEmptyChats = existingChatsResponse.data.filter((chat) => !isChatEmpty(chat));
             const emptyChats = existingChatsResponse.data.filter((chat) => isChatEmpty(chat));
 
             if (emptyChats.length > 0) {
@@ -98,12 +117,6 @@ export const AppContextProvider = ({ children }) => {
                     emptyChats.map((chat) => deleteChatById(chat._id, token))
                 );
             }
-
-            const cleanedChats = nonEmptyChats;
-            const sortedChats = sortChatsByUpdatedAt(cleanedChats);
-
-            setChats(sortedChats);
-            setSelectedChat(null);
 
             const { data } = await axios.post(
                 '/api/chat/create',
@@ -116,12 +129,24 @@ export const AppContextProvider = ({ children }) => {
             }
 
             const newChat = data.data;
-            setChats((prevChats) => [newChat, ...prevChats.filter((chat) => chat._id !== newChat._id)]);
-            setSelectedChat(newChat);
-            router.push('/chat_window');
+            setChats((prevChats) => [
+                newChat,
+                ...sortChatsByUpdatedAt(
+                    prevChats.filter((chat) => chat._id !== tempChatId && !isChatEmpty(chat))
+                )
+            ]);
+            setSelectedChat((prevSelectedChat) =>
+                prevSelectedChat?._id === tempChatId ? newChat : prevSelectedChat
+            );
             return newChat;
         } catch (error) {
+            setChats((prevChats) => prevChats.filter((chat) => !String(chat._id).startsWith('temp-')));
+            setSelectedChat((prevSelectedChat) =>
+                String(prevSelectedChat?._id || '').startsWith('temp-') ? null : prevSelectedChat
+            );
             toast.error(error.message);
+        } finally {
+            setIsCreatingChat(false);
         }
     }
 
@@ -164,7 +189,8 @@ export const AppContextProvider = ({ children }) => {
         setSelectedChat,
         selectChatById,
         fetchUsersChats,
-        createNewChat
+        createNewChat,
+        isCreatingChat
     }
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

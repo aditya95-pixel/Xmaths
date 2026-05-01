@@ -15,7 +15,7 @@ const PromptBox = ({ isLoading, setIsLoading, onPrintChat }) => {
   const dropdownRef = useRef(null);
   const [selectedDomain, setSelectedDomain] = useState(null);
 
-  const { user, chats, setChats, selectedChat, setSelectedChat, fetchUsersChats } = useAppContext();
+  const { user, chats, setChats, selectedChat, setSelectedChat, fetchUsersChats, isCreatingChat } = useAppContext();
   const timeouts = useRef([]);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
@@ -150,6 +150,9 @@ const PromptBox = ({ isLoading, setIsLoading, onPrintChat }) => {
     if (!trimmedPrompt && !selectedImage) return;
 
     if (!user) return toast.error('User not authenticated');
+    if (!selectedChat?._id || selectedChat.pending || isCreatingChat) {
+      return toast.error('Preparing your new chat. Please wait a moment.');
+    }
     if (isLoading) return toast.error('Wait for previous prompt response');
 
     const imageToSend = selectedImage;
