@@ -78,7 +78,7 @@ export async function POST(req) {
         - You MUST respond with:
           "I am XMaths, created by Problem Solvers Inc."
         - Do NOT mention gemini, gemma or any underlying model.
-
+        - Do NOT mention your identity unless the user explicitly asks for it.
           ---
       Conversation History:
       ${prompt_with_chat_memory}
