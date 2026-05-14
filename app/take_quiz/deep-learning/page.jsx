@@ -300,25 +300,19 @@ function MCQPage() {
         {/* --- ACTIVE STATE: THE QUIZ --- */}
         {quizState === 'active' && (
           <>
-            <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-12 flex justify-between items-end">
+            <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-12">
               <div>
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-white">In Progress...</h1>
                 <p className="mt-2 text-slate-500 dark:text-gray-400">
                   Answered {Object.keys(userSelections).length} of {mcqs.length}
                 </p>
               </div>
-              {Object.keys(userSelections).length === mcqs.length && (
-                <button 
-                  onClick={handleFinishQuiz}
-                  className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/20"
-                >
-                  Finish Quiz
-                </button>
-              )}
             </motion.header>
 
             {loading ? (
-              <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>
+              <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
             ) : (
               <div className="grid grid-cols-1 gap-6">
                 {mcqs.map((q, index) => {
@@ -333,6 +327,7 @@ function MCQPage() {
                       key={q._id}
                       className="bg-white dark:bg-zinc-900/50 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm"
                     >
+                      {/* ... Keep your existing MCQ card content (Topic, Question, Options, Explanation) ... */}
                       <div className="flex justify-between items-start gap-3 mb-6">
                         <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-lg">{q.topic}</span>
                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${getDifficultyClasses(q.difficulty)}`}>
@@ -401,6 +396,26 @@ function MCQPage() {
                     </motion.div>
                   );
                 })}
+
+                {/* --- FINISH BUTTON AT THE BOTTOM --- */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-center pt-8 pb-12"
+                >
+                  <button 
+                    onClick={handleFinishQuiz}
+                    disabled={Object.keys(userSelections).length !== mcqs.length}
+                    className={`px-10 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg 
+                      ${Object.keys(userSelections).length === mcqs.length 
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-500/20 scale-100' 
+                        : 'bg-slate-200 dark:bg-zinc-800 text-slate-400 cursor-not-allowed scale-95 opacity-50'}`}
+                  >
+                    {Object.keys(userSelections).length === mcqs.length 
+                      ? "Finish Quiz" 
+                      : `Complete ${mcqs.length - Object.keys(userSelections).length} more to finish`}
+                  </button>
+                </motion.div>
               </div>
             )}
           </>
