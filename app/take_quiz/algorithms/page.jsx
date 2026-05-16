@@ -3,6 +3,8 @@ import React, { useEffect, useState, useCallback} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -449,7 +451,12 @@ function MCQPage() {
               <div className="mt-8 text-left p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800">
                 <h4 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">Tutor's Feedback</h4>
                 <div className="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
-                  <ReactMarkdown>{aiExplanation}</ReactMarkdown>
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkMath]} 
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {aiExplanation}
+                  </ReactMarkdown>
                 </div>
               </div>
             )}
