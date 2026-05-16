@@ -77,7 +77,7 @@ export async function POST(req) {
         }
       `;
       const completion = await genAI.models.generateContent({
-        model: "gemma-4-31b-it", 
+        model: "gemma-4-26b-a4b-it", 
         contents: [
           {
             role: "user",
