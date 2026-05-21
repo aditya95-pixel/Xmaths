@@ -127,7 +127,7 @@ export async function POST(req) {
       try {
         const titlePrompt = `Generate a short, concise 3-5 word title for a chat that begins with this message: "${prompt}". Output ONLY the title text, no quotes or formatting.`;
         const titleResult = await genAI.models.generateContent({
-          model:"gemma-4-26b-a4b-it",
+          model:"gemini-3.1-flash-lite",
           contents:titlePrompt
         });
         const generatedTitle = titleResult.text;
